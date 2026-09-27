@@ -20,5 +20,3 @@ services:
             - '../src/Processing/IssueSummary.php'
             - '../src/Ingest/Envelope/Envelope.php'
             - '../src/Ingest/Envelope/EnvelopeItem.php'
-
-    App\Notification\IssueNotifierInterface: '@App\Notification\NullIssueNotifier'
