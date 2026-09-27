@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -10,7 +12,7 @@ class Kernel extends BaseKernel
     use MicroKernelTrait;
 
     /**
-     * @return list<string> An array of allowed values for APP_ENV
+     * @return list<string>
      */
     private function getAllowedEnvs(): array
     {
