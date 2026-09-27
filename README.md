@@ -1,7 +1,63 @@
 # Faultline
 
-Self-hosted error tracker for my own apps. It speaks the Sentry protocol, so apps use the official Sentry SDKs and only point the DSN here. Symfony 8, PostgreSQL, Messenger.
+Self-hosted error tracker for my own apps. It speaks the Sentry protocol, so apps keep the official Sentry SDKs and only point the DSN here. Symfony 8, PostgreSQL, Messenger.
 
 [Polska wersja](README.pl.md)
 
-Work in progress, see [docs/plan.md](docs/plan.md).
+## Development
+
+```sh
+docker compose up -d
+docker compose exec app composer install
+docker compose exec app bin/console doctrine:migrations:migrate -n
+docker compose exec app bin/console faultline:user:create admin
+docker compose exec app bin/console messenger:consume async -vv
+```
+
+The app listens on `http://127.0.0.1:8000` (`APP_PORT` changes it).
+
+## Production
+
+Fill in every value of `container/.env`, then run the deploy script (build, migrations, `web` + `worker` + `db`):
+
+```sh
+cp .env.example container/.env
+container/deploy.sh
+```
+
+`web` binds to `127.0.0.1:$FAULTLINE_PORT`; put a reverse proxy with TLS in front of it. Migrations run in `deploy.sh`, not on container start. CI deploys pushes to `main` when the `DEPLOY_*` secrets are set.
+
+Daily cron on the host:
+
+```sh
+docker compose -f container/compose.yaml exec -T worker php bin/console faultline:purge
+```
+
+## Commands
+
+| Command | Purpose |
+| --- | --- |
+| `faultline:user:create <username>` | Create the admin or reset its password |
+| `faultline:project:create <name> [--origin=…] [--retention=30]` | Create a project and print its DSN |
+| `faultline:project:rotate-key <slug>` | Replace the key and print the new DSN |
+| `faultline:purge` | Delete events past retention and empty issues |
+
+## Integrations
+
+- Telegram: set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to get new issues and regressions, at most one message per issue per hour.
+- Digest: set `DIGEST_TOKEN` (16+ characters) and call `GET /api/digest` with `Authorization: Bearer <token>`.
+
+## Tests
+
+```sh
+vendor/bin/php-cs-fixer check
+vendor/bin/phpstan analyse
+vendor/bin/phpunit --coverage-clover var/coverage/clover.xml
+php bin/check-coverage.php var/coverage/clover.xml 80
+```
+
+Tests need PostgreSQL (`DATABASE_URL`) and the test database: `bin/console doctrine:database:create --env=test && bin/console doctrine:migrations:migrate -n --env=test`.
+
+## License
+
+MIT
