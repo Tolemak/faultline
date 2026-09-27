@@ -11,6 +11,7 @@ framework:
             failed: 'doctrine://default?queue_name=failed&auto_setup=0'
 
         routing:
+            App\Message\ProcessEvent: async
 
 when@test:
     framework:
