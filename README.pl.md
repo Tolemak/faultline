@@ -6,7 +6,10 @@ Własny tracker błędów dla moich aplikacji. Rozumie protokół Sentry, więc 
 
 ## Rozwój
 
+Konfiguracja pochodzi ze zmiennych środowiskowych. Lokalnie skopiuj szablon i ustaw `APP_ENV=dev`, losowy `APP_SECRET` oraz `DATABASE_URL`:
+
 ```sh
+cp .env.example .env.local
 docker compose up -d
 docker compose exec app composer install
 docker compose exec app bin/console doctrine:migrations:migrate -n
@@ -18,7 +21,7 @@ Aplikacja działa pod `http://127.0.0.1:8000` (port zmienia `APP_PORT`).
 
 ## Produkcja
 
-Uzupełnij wszystkie wartości w `container/.env` i uruchom skrypt wdrożenia (build, migracje, `web` + `worker` + `db`):
+Na serwerze uzupełnij wszystkie wartości w `container/.env` (czyta go Compose, nie trafia do obrazu) i uruchom skrypt wdrożenia (build, migracje, `web` + `worker` + `db`):
 
 ```sh
 cp .env.example container/.env
@@ -56,7 +59,7 @@ vendor/bin/phpunit --coverage-clover var/coverage/clover.xml
 php bin/check-coverage.php var/coverage/clover.xml 80
 ```
 
-Testy potrzebują PostgreSQL (`DATABASE_URL`) i bazy testowej: `bin/console doctrine:database:create --env=test && bin/console doctrine:migrations:migrate -n --env=test`.
+Testy czytają `.env.test` i potrzebują PostgreSQL przez `DATABASE_URL` (zmienna środowiskowa albo nieśledzony `.env.test.local`) oraz bazy testowej: `bin/console doctrine:database:create --env=test && bin/console doctrine:migrations:migrate -n --env=test`.
 
 ## Licencja
 

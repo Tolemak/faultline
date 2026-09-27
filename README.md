@@ -6,7 +6,10 @@ Self-hosted error tracker for my own apps. It speaks the Sentry protocol, so app
 
 ## Development
 
+Configuration comes from environment variables. For local work copy the template, set `APP_ENV=dev`, a random `APP_SECRET` and `DATABASE_URL`:
+
 ```sh
+cp .env.example .env.local
 docker compose up -d
 docker compose exec app composer install
 docker compose exec app bin/console doctrine:migrations:migrate -n
@@ -18,7 +21,7 @@ The app listens on `http://127.0.0.1:8000` (`APP_PORT` changes it).
 
 ## Production
 
-Fill in every value of `container/.env`, then run the deploy script (build, migrations, `web` + `worker` + `db`):
+On the server fill in every value of `container/.env` (it is read by Compose, never baked into the image), then run the deploy script (build, migrations, `web` + `worker` + `db`):
 
 ```sh
 cp .env.example container/.env
@@ -56,7 +59,7 @@ vendor/bin/phpunit --coverage-clover var/coverage/clover.xml
 php bin/check-coverage.php var/coverage/clover.xml 80
 ```
 
-Tests need PostgreSQL (`DATABASE_URL`) and the test database: `bin/console doctrine:database:create --env=test && bin/console doctrine:migrations:migrate -n --env=test`.
+Tests read `.env.test` and need PostgreSQL through `DATABASE_URL` (environment variable or an untracked `.env.test.local`), plus the test database: `bin/console doctrine:database:create --env=test && bin/console doctrine:migrations:migrate -n --env=test`.
 
 ## License
 
