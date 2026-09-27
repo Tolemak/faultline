@@ -1,0 +1,114 @@
+nav:
+    logout: Wyloguj
+    breadcrumbs: Nawigacja
+login:
+    title: Logowanie
+    username: Login
+    password: Hasło
+    submit: Zaloguj
+bar:
+    projects: projekty
+    issues: problemy
+    magnitude: magnituda
+projects:
+    title: Projekty
+    subtitle: Każdy projekt to stacja. Zapis pokazuje zdarzenia z ostatnich 24 godzin.
+    empty: Nie ma jeszcze projektów. Utwórz pierwszy poniżej albo przez bin/console faultline:project:create.
+    trace_label: '{count, plural, one {# zdarzenie w ostatnich 24 godzinach} few {# zdarzenia w ostatnich 24 godzinach} other {# zdarzeń w ostatnich 24 godzinach}}'
+    open_issues: Otwarte problemy
+    events_24h: Zdarzenia 24h
+    settings: Ustawienia
+    new: Nowy projekt
+    new_placeholder: Moja aplikacja
+    create: Utwórz
+project:
+    create:
+        invalid_name: Nazwa projektu musi mieć od 1 do 100 znaków.
+        done: Projekt utworzony. Skopiuj DSN do aplikacji.
+settings:
+    title: 'Ustawienia: {name}'
+    dsn: DSN
+    copy: Kopiuj
+    copied: Skopiowano
+    rotate: Zmień klucz
+    rotate_confirm: Aplikacje z obecnym DSN przestaną wysyłać błędy, dopóki nie dostaną nowego. Zmienić?
+    rotate_hint: Stary klucz przestaje działać od razu.
+    general: Ogólne
+    name: Nazwa
+    origins: Dozwolone originy przeglądarki
+    origins_hint: Jeden w wierszu, np. https://app.example.com. Gwiazdka * dopuszcza każdy origin.
+    retention: Retencja (dni)
+    save: Zapisz
+    saved: Ustawienia zapisane.
+    key_rotated: Klucz zmieniony. Zaktualizuj DSN w aplikacjach.
+    snippets: Konfiguracja
+    snippets_hint: Oficjalne SDK Sentry działają bez zmian, wystarczy wskazać ten DSN.
+    snippet_browser: Przeglądarka
+    snippet_browser_hint: Dodaj origin strony do dozwolonych originów powyżej.
+    error:
+        name: Nazwa musi mieć od 1 do 100 znaków.
+        origins: Każdy origin musi mieć postać https://host[:port] albo być gwiazdką *.
+        retention: Retencja musi wynosić od 1 do 365 dni.
+issues:
+    count: '{count, plural, =0 {Brak problemów} one {# problem} few {# problemy} other {# problemów}}'
+    search: Szukaj
+    search_placeholder: Tytuł lub miejsce
+    status: Status
+    level: Poziom
+    any: Dowolny
+    environment: Środowisko
+    release: Wydanie
+    sort: Sortuj
+    sort_last_seen: Ostatnio widziane
+    sort_events: Liczba zdarzeń
+    sort_first_seen: Pierwsze wystąpienie
+    apply: Filtruj
+    empty: Cisza. Żaden problem nie pasuje do filtrów.
+    events: Zdarzenia
+    last_seen: Ostatnio
+    pages: Strony
+status:
+    unresolved: Otwarte
+    resolved: Rozwiązane
+    ignored: Ignorowane
+    all: Wszystkie
+level:
+    debug: Debug
+    info: Info
+    warning: Ostrzeżenie
+    error: Błąd
+    fatal: Krytyczny
+pager:
+    newer: Nowsze
+    older: Starsze
+    position: 'Strona {page} z {pages}'
+issue:
+    resolve: Rozwiąż
+    ignore: Ignoruj
+    reopen: Otwórz ponownie
+    first_seen: Pierwsze wystąpienie
+    release: Wydanie
+    tags: Tagi
+    event: Zdarzenie
+    event_pager: Zdarzenia
+    event_position: '{position} z {count}'
+    occurred_at: Wystąpiło
+    platform: Platforma
+    transaction: Transakcja
+    message: Komunikat
+    no_frames: Brak stosu wywołań.
+    hidden_frames: '{count, plural, one {# ramka biblioteki} few {# ramki bibliotek} other {# ramek bibliotek}}'
+    request: Żądanie
+    headers: Nagłówki
+    request_query_string: Parametry zapytania
+    request_data: Treść
+    request_env: Środowisko
+    user: Użytkownik
+    contexts: Konteksty
+    extra: Dodatkowe
+    variables: Zmienne
+time:
+    just_now: przed chwilą
+    minutes_ago: '{count, plural, one {# minutę temu} few {# minuty temu} other {# minut temu}}'
+    hours_ago: '{count, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}'
+    days_ago: '{count, plural, one {# dzień temu} other {# dni temu}}'

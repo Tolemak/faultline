@@ -1,0 +1,114 @@
+nav:
+    logout: Log out
+    breadcrumbs: Breadcrumbs
+login:
+    title: Sign in
+    username: Username
+    password: Password
+    submit: Sign in
+bar:
+    projects: projects
+    issues: issues
+    magnitude: magnitude
+projects:
+    title: Projects
+    subtitle: Every project is a station. The trace shows events from the last 24 hours.
+    empty: No projects yet. Create one below or with bin/console faultline:project:create.
+    trace_label: '{count, plural, one {# event in the last 24 hours} other {# events in the last 24 hours}}'
+    open_issues: Open issues
+    events_24h: Events 24h
+    settings: Settings
+    new: New project
+    new_placeholder: My app
+    create: Create
+project:
+    create:
+        invalid_name: The project name must be 1 to 100 characters long.
+        done: Project created. Copy the DSN into your app.
+settings:
+    title: '{name} settings'
+    dsn: DSN
+    copy: Copy
+    copied: Copied
+    rotate: Rotate key
+    rotate_confirm: Apps using the current DSN will stop reporting until they get the new one. Rotate?
+    rotate_hint: The old key stops working immediately.
+    general: General
+    name: Name
+    origins: Allowed browser origins
+    origins_hint: One per line, e.g. https://app.example.com. Use * to allow any origin.
+    retention: Retention (days)
+    save: Save
+    saved: Settings saved.
+    key_rotated: Key rotated. Update the DSN in your apps.
+    snippets: Setup
+    snippets_hint: Official Sentry SDKs work unchanged, only the DSN points here.
+    snippet_browser: Browser
+    snippet_browser_hint: Add the site origin to the allowed origins above.
+    error:
+        name: The name must be 1 to 100 characters long.
+        origins: Each origin must look like https://host[:port] or be *.
+        retention: Retention must be between 1 and 365 days.
+issues:
+    count: '{count, plural, =0 {No issues} one {# issue} other {# issues}}'
+    search: Search
+    search_placeholder: Title or culprit
+    status: Status
+    level: Level
+    any: Any
+    environment: Environment
+    release: Release
+    sort: Sort
+    sort_last_seen: Last seen
+    sort_events: Events
+    sort_first_seen: First seen
+    apply: Apply
+    empty: Quiet. No issues match these filters.
+    events: Events
+    last_seen: Last seen
+    pages: Pages
+status:
+    unresolved: Unresolved
+    resolved: Resolved
+    ignored: Ignored
+    all: All
+level:
+    debug: Debug
+    info: Info
+    warning: Warning
+    error: Error
+    fatal: Fatal
+pager:
+    newer: Newer
+    older: Older
+    position: 'Page {page} of {pages}'
+issue:
+    resolve: Resolve
+    ignore: Ignore
+    reopen: Reopen
+    first_seen: First seen
+    release: Release
+    tags: Tags
+    event: Event
+    event_pager: Events
+    event_position: '{position} of {count}'
+    occurred_at: Occurred
+    platform: Platform
+    transaction: Transaction
+    message: Message
+    no_frames: No stack trace.
+    hidden_frames: '{count, plural, one {# library frame} other {# library frames}}'
+    request: Request
+    headers: Headers
+    request_query_string: Query string
+    request_data: Body
+    request_env: Environment
+    user: User
+    contexts: Contexts
+    extra: Extra
+    variables: Variables
+time:
+    just_now: just now
+    minutes_ago: '{count, plural, one {# minute ago} other {# minutes ago}}'
+    hours_ago: '{count, plural, one {# hour ago} other {# hours ago}}'
+    days_ago: '{count, plural, one {# day ago} other {# days ago}}'
