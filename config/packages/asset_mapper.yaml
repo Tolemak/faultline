@@ -2,7 +2,10 @@ framework:
     asset_mapper:
         paths:
             - assets/
+        excluded_patterns:
+            - '*/fonts/OFL.txt'
         missing_import_mode: strict
+        importmap_polyfill: false
 
 when@prod:
     framework:
