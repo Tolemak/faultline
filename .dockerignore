@@ -1,7 +1,7 @@
 .git
 .github
-.env.local
-.env.*.local
+.env
+.env.*
 .phpunit.cache
 .php-cs-fixer.cache
 assets/vendor

@@ -1,4 +1,12 @@
 parameters:
+    env(DEFAULT_URI): 'http://localhost'
+    env(DATABASE_URL): 'postgresql://faultline@127.0.0.1:5432/faultline?serverVersion=18&charset=utf8'
+    env(MESSENGER_TRANSPORT_DSN): 'doctrine://default?auto_setup=0'
+    env(INGEST_RATE_LIMIT): '300'
+    env(TRUSTED_PROXIES): ''
+    env(TELEGRAM_BOT_TOKEN): ''
+    env(TELEGRAM_CHAT_ID): ''
+    env(DIGEST_TOKEN): ''
     faultline.ingest.max_wire_bytes: 1048576
     faultline.ingest.max_inflated_bytes: 8388608
     faultline.ingest.json_max_depth: 64
@@ -14,6 +22,7 @@ services:
         exclude:
             - '../src/Entity/'
             - '../src/Kernel.php'
+            - '../src/Runtime/'
             - '../src/Message/'
             - '../src/Processing/NormalizedEvent.php'
             - '../src/Processing/RecordedEvent.php'
