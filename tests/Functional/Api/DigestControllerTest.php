@@ -19,7 +19,7 @@ final class DigestControllerTest extends WebTestCase
     use EventSeeder;
     use ProjectFixtures;
 
-    private const string TOKEN = 'test-digest-token-0123456789';
+    private const string TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaa';
 
     private KernelBrowser $client;
 

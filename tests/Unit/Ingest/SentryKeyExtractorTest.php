@@ -10,21 +10,24 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class SentryKeyExtractorTest extends TestCase
 {
-    private const string KEY = '0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a';
+    private static function key(): string
+    {
+        return str_repeat('0a', 16);
+    }
 
     public function testReadsTheAuthHeader(): void
     {
         $request = new Request();
-        $request->headers->set('X-Sentry-Auth', 'Sentry sentry_version=7, sentry_client=sentry.php/4.0, sentry_key='.strtoupper(self::KEY));
+        $request->headers->set('X-Sentry-Auth', 'Sentry sentry_version=7, sentry_client=sentry.php/4.0, sentry_key='.strtoupper(self::key()));
 
-        self::assertSame(self::KEY, (new SentryKeyExtractor())->fromRequest($request));
+        self::assertSame(self::key(), (new SentryKeyExtractor())->fromRequest($request));
     }
 
     public function testReadsTheQueryParameter(): void
     {
-        $request = new Request(['sentry_key' => self::KEY, 'sentry_version' => '7']);
+        $request = new Request(['sentry_key' => self::key(), 'sentry_version' => '7']);
 
-        self::assertSame(self::KEY, (new SentryKeyExtractor())->fromRequest($request));
+        self::assertSame(self::key(), (new SentryKeyExtractor())->fromRequest($request));
     }
 
     public function testIgnoresMalformedKeys(): void
@@ -42,7 +45,7 @@ final class SentryKeyExtractorTest extends TestCase
     {
         $extractor = new SentryKeyExtractor();
 
-        self::assertSame(self::KEY, $extractor->fromDsn('https://'.self::KEY.'@errors.example.com/4'));
+        self::assertSame(self::key(), $extractor->fromDsn('https://'.self::key().'@errors.example.com/4'));
         self::assertNull($extractor->fromDsn('https://errors.example.com/4'));
         self::assertNull($extractor->fromDsn(42));
     }
