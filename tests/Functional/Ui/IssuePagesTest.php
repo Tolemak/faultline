@@ -11,6 +11,7 @@ use App\Repository\IssueRepository;
 use App\Tests\Support\AdminFixtures;
 use App\Tests\Support\EventSeeder;
 use App\Tests\Support\ProjectFixtures;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -233,14 +234,13 @@ final class IssuePagesTest extends WebTestCase
 
     private function reload(Issue $issue): Issue
     {
-        $repository = self::getContainer()->get(IssueRepository::class);
-        $repository->getEntityManager()->clear();
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
 
-        return $repository->find($issue->getId()) ?? throw new \LogicException('Issue not found.');
+        return self::getContainer()->get(IssueRepository::class)->find($issue->getId()) ?? throw new \LogicException('Issue not found.');
     }
 
     private function flush(): void
     {
-        self::getContainer()->get(IssueRepository::class)->getEntityManager()->flush();
+        self::getContainer()->get(EntityManagerInterface::class)->flush();
     }
 }

@@ -56,9 +56,9 @@ final class SecurityTest extends WebTestCase
         self::assertDoesNotMatchRegularExpression('/<style\b/i', $html);
         self::assertDoesNotMatchRegularExpression('/\sstyle=/i', $html);
         preg_match("/'nonce-([^']+)'/", $csp, $nonce);
-        foreach ($this->client->getCrawler()->filter('script') as $script) {
-            self::assertSame($nonce[1] ?? null, $script->getAttribute('nonce'));
-        }
+        $scriptNonces = $this->client->getCrawler()->filter('script')->extract(['nonce']);
+        self::assertNotEmpty($scriptNonces);
+        self::assertSame(array_fill(0, \count($scriptNonces), $nonce[1] ?? null), $scriptNonces);
         self::assertStringNotContainsString('https://', implode('', $this->client->getCrawler()->filter('script[src], link[href]')->extract(['src', 'href'])));
     }
 

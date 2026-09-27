@@ -9,6 +9,7 @@ use App\Repository\ProjectRepository;
 use App\Tests\Support\AdminFixtures;
 use App\Tests\Support\EventSeeder;
 use App\Tests\Support\ProjectFixtures;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -158,9 +159,8 @@ final class ProjectPagesTest extends WebTestCase
 
     private function project(string $slug): Project
     {
-        $repository = self::getContainer()->get(ProjectRepository::class);
-        $repository->getEntityManager()->clear();
+        self::getContainer()->get(EntityManagerInterface::class)->clear();
 
-        return $repository->findOneBySlug($slug) ?? throw new \LogicException('Project not found.');
+        return self::getContainer()->get(ProjectRepository::class)->findOneBySlug($slug) ?? throw new \LogicException('Project not found.');
     }
 }

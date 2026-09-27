@@ -46,7 +46,7 @@ final readonly class IssueCriteria
     public function toQuery(): array
     {
         return array_filter([
-            'status' => $this->status?->value ?? 'all',
+            'status' => $this->status->value ?? 'all',
             'level' => $this->level?->value,
             'environment' => $this->environment,
             'release' => $this->release,
