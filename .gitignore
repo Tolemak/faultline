@@ -1,10 +1,14 @@
-
-###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
 /.env.*.local
+/config/reference.php
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
+/public/assets/
+/assets/vendor/
 /var/
 /vendor/
-###< symfony/framework-bundle ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+/phpunit.xml
+/.phpunit.cache/
