@@ -1,0 +1,144 @@
+{% extends 'base.html.twig' %}
+
+{% set json_flags = constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE') %}
+
+{% block title %}{{ issue.title }}{% endblock %}
+
+{% block breadcrumbs %}{{ include('partials/project_nav.html.twig', {active: 'issues'}) }}{% endblock %}
+
+{% block body %}
+    <div class="page-head page-head--issue">
+        {{ include('partials/magnitude.html.twig', {level: issue.level}) }}
+        <div>
+            <h1 class="issue-title">{{ issue.title }}</h1>
+            <p class="muted">{{ issue.culprit ?? '—' }}</p>
+        </div>
+    </div>
+
+    {{ include('issue/_status.html.twig') }}
+
+    <dl class="readings readings--wide">
+        <div><dt>{{ 'issues.events'|trans }}</dt><dd>{{ issue.eventCount }}</dd></div>
+        <div><dt>{{ 'issue.first_seen'|trans }}</dt><dd><time datetime="{{ issue.firstSeen|date('c') }}">{{ issue.firstSeen|ago }}</time></dd></div>
+        <div><dt>{{ 'issues.last_seen'|trans }}</dt><dd><time datetime="{{ issue.lastSeen|date('c') }}">{{ issue.lastSeen|ago }}</time></dd></div>
+        <div><dt>{{ 'issue.release'|trans }}</dt><dd>{{ issue.lastRelease ?? '—' }}</dd></div>
+    </dl>
+
+    {% if tags is not empty %}
+        <section class="panel">
+            <h2>{{ 'issue.tags'|trans }}</h2>
+            <div class="tags">
+                {% for key, values in tags %}
+                    <div class="tag">
+                        <h3>{{ key }}</h3>
+                        <ul>
+                            {% for item in values %}
+                                <li>
+                                    <span class="tag__value">{{ item.value }}</span>
+                                    <svg class="tag__bar" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><rect width="{{ (item.share * 100)|round(1) }}" height="6"/></svg>
+                                    <span class="tag__share">{{ (item.share * 100)|round }}%</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    {% if event %}
+        <section class="panel event">
+            <div class="event__head">
+                <h2>{{ 'issue.event'|trans }} <code>{{ event.eventId }}</code></h2>
+                <nav class="pager" aria-label="{{ 'issue.event_pager'|trans }}">
+                    {% if offset > 0 %}
+                        <a href="{{ path('app_issue', {slug: project.slug, id: issue.id, event: offset - 1}) }}" rel="prev">{{ 'pager.newer'|trans }}</a>
+                    {% endif %}
+                    <span>{{ 'issue.event_position'|trans({position: offset + 1, count: count}) }}</span>
+                    {% if offset + 1 < count %}
+                        <a href="{{ path('app_issue', {slug: project.slug, id: issue.id, event: offset + 1}) }}" rel="next">{{ 'pager.older'|trans }}</a>
+                    {% endif %}
+                </nav>
+            </div>
+
+            <dl class="facts">
+                <div><dt>{{ 'issue.occurred_at'|trans }}</dt><dd><time datetime="{{ event.occurredAt|date('c') }}">{{ event.occurredAt|date('Y-m-d H:i:s') }} UTC</time></dd></div>
+                <div><dt>{{ 'issue.platform'|trans }}</dt><dd>{{ event.platform }}</dd></div>
+                <div><dt>{{ 'issues.environment'|trans }}</dt><dd>{{ event.environment ?? '—' }}</dd></div>
+                <div><dt>{{ 'issue.release'|trans }}</dt><dd>{{ event.release ?? '—' }}</dd></div>
+                {% if event.transaction %}<div><dt>{{ 'issue.transaction'|trans }}</dt><dd>{{ event.transaction }}</dd></div>{% endif %}
+            </dl>
+
+            {% if event.message %}
+                <h3>{{ 'issue.message'|trans }}</h3>
+                <pre class="message">{{ event.message }}</pre>
+            {% endif %}
+
+            {% for exception in event.exception|reverse %}
+                <div class="exception">
+                    <h3 class="exception__title"><span>{{ exception.type ?? 'Error' }}</span> {{ exception.value }}</h3>
+                    {% if exception.frames is empty %}
+                        <p class="muted">{{ 'issue.no_frames'|trans }}</p>
+                    {% endif %}
+                    {% for group in frame_groups(exception.frames) %}
+                        {% if group.in_app %}
+                            {% for frame in group.frames %}
+                                {{ include('issue/_frame.html.twig', {frame: frame, app: true}) }}
+                            {% endfor %}
+                        {% else %}
+                            <details class="frames-hidden">
+                                <summary>{{ 'issue.hidden_frames'|trans({count: group.frames|length}) }}</summary>
+                                {% for frame in group.frames %}
+                                    {{ include('issue/_frame.html.twig', {frame: frame, app: false}) }}
+                                {% endfor %}
+                            </details>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            {% if event.request %}
+                <h3>{{ 'issue.request'|trans }}</h3>
+                <p class="request-line"><strong>{{ event.request.method ?? 'GET' }}</strong> {{ event.request.url ?? '' }}</p>
+                {% if event.request.headers is defined and event.request.headers is not empty %}
+                    <table class="kv">
+                        <caption>{{ 'issue.headers'|trans }}</caption>
+                        {% for name, value in event.request.headers %}
+                            <tr><th scope="row">{{ name }}</th><td>{{ value is iterable ? value|json_encode(json_flags) : value }}</td></tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+                {% for key in ['query_string', 'data', 'env'] %}
+                    {% if event.request[key] is defined %}
+                        <h4>{{ ('issue.request_' ~ key)|trans }}</h4>
+                        <pre class="json">{{ event.request[key] is iterable ? event.request[key]|json_encode(json_flags) : event.request[key] }}</pre>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {% if event.user %}
+                <h3>{{ 'issue.user'|trans }}</h3>
+                <pre class="json">{{ event.user|json_encode(json_flags) }}</pre>
+            {% endif %}
+
+            {% if event.contexts is not empty %}
+                <h3>{{ 'issue.contexts'|trans }}</h3>
+                <dl class="contexts">
+                    {% for name, context in event.contexts %}
+                        <div><dt>{{ name }}</dt><dd><pre class="json">{{ context is iterable ? context|json_encode(json_flags) : context }}</pre></dd></div>
+                    {% endfor %}
+                </dl>
+            {% endif %}
+
+            {% if event.extra is not empty %}
+                <h3>{{ 'issue.extra'|trans }}</h3>
+                <pre class="json">{{ event.extra|json_encode(json_flags) }}</pre>
+            {% endif %}
+        </section>
+    {% endif %}
+{% endblock %}
+
+{% block bar %}
+    <tolemak-field label="{{ 'bar.magnitude'|trans }}" tone="{{ issue.level.magnitude >= 4 ? 'error' : (issue.level.magnitude == 3 ? 'warn' : 'accent') }}">M{{ issue.level.magnitude }}</tolemak-field>
+    <tolemak-field label="{{ 'issues.events'|trans }}">{{ issue.eventCount }}</tolemak-field>
+{% endblock %}

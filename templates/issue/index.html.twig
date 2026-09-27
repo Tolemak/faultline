@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block breadcrumbs %}{{ include('partials/project_nav.html.twig', {active: 'issues'}) }}{% endblock %}
+
+{% block body %}
+    <div class="page-head">
+        <h1>{{ project.name }}</h1>
+        <p class="muted">{{ 'issues.count'|trans({count: page.total}) }}</p>
+    </div>
+
+    <form method="get" class="filters" role="search" data-turbo-action="advance">
+        <label class="field field--grow">
+            <span>{{ 'issues.search'|trans }}</span>
+            <input type="search" name="q" value="{{ criteria.search }}" placeholder="{{ 'issues.search_placeholder'|trans }}">
+        </label>
+        <label class="field">
+            <span>{{ 'issues.status'|trans }}</span>
+            <select name="status">
+                {% for status in ['unresolved', 'resolved', 'ignored', 'all'] %}
+                    <option value="{{ status }}"{% if (criteria.status.value ?? 'all') == status %} selected{% endif %}>{{ ('status.' ~ status)|trans }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="field">
+            <span>{{ 'issues.level'|trans }}</span>
+            <select name="level">
+                <option value="">{{ 'issues.any'|trans }}</option>
+                {% for level in ['fatal', 'error', 'warning', 'info', 'debug'] %}
+                    <option value="{{ level }}"{% if criteria.level and criteria.level.value == level %} selected{% endif %}>{{ ('level.' ~ level)|trans }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="field">
+            <span>{{ 'issues.environment'|trans }}</span>
+            <select name="environment">
+                <option value="">{{ 'issues.any'|trans }}</option>
+                {% for environment in options.environments %}
+                    <option value="{{ environment }}"{% if criteria.environment == environment %} selected{% endif %}>{{ environment }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="field">
+            <span>{{ 'issues.release'|trans }}</span>
+            <select name="release">
+                <option value="">{{ 'issues.any'|trans }}</option>
+                {% for release in options.releases %}
+                    <option value="{{ release }}"{% if criteria.release == release %} selected{% endif %}>{{ release }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="field">
+            <span>{{ 'issues.sort'|trans }}</span>
+            <select name="sort">
+                {% for sort in ['last_seen', 'events', 'first_seen'] %}
+                    <option value="{{ sort }}"{% if criteria.sort == sort %} selected{% endif %}>{{ ('issues.sort_' ~ sort)|trans }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="button">{{ 'issues.apply'|trans }}</button>
+    </form>
+
+    {% if page.issues is empty %}
+        <p class="empty">{{ 'issues.empty'|trans }}</p>
+    {% else %}
+        <ol class="issues">
+            {% for issue in page.issues %}
+                <li class="issue issue--{{ issue.status.value }}">
+                    {{ include('partials/magnitude.html.twig', {level: issue.level}) }}
+                    <div class="issue__main">
+                        <a class="issue__title" href="{{ path('app_issue', {slug: project.slug, id: issue.id}) }}">{{ issue.title }}</a>
+                        <span class="issue__culprit">{{ issue.culprit ?? '—' }}</span>
+                    </div>
+                    <svg class="trace trace--small" viewBox="0 0 84 20" preserveAspectRatio="none" aria-hidden="true">
+                        <polyline points="{{ sparkline(page.trends[issue.id] ?? [], 84, 20) }}"/>
+                    </svg>
+                    <dl class="issue__stats">
+                        <div><dt>{{ 'issues.events'|trans }}</dt><dd>{{ issue.eventCount }}</dd></div>
+                        <div><dt>{{ 'issues.last_seen'|trans }}</dt><dd><time datetime="{{ issue.lastSeen|date('c') }}">{{ issue.lastSeen|ago }}</time></dd></div>
+                    </dl>
+                </li>
+            {% endfor %}
+        </ol>
+
+        {% if page.pages > 1 %}
+            <nav class="pager" aria-label="{{ 'issues.pages'|trans }}">
+                {% if page.page > 1 %}
+                    <a href="{{ path('app_issues', {slug: project.slug}|merge(criteria.toQuery)|merge({page: page.page - 1})) }}" rel="prev">{{ 'pager.newer'|trans }}</a>
+                {% endif %}
+                <span>{{ 'pager.position'|trans({page: page.page, pages: page.pages}) }}</span>
+                {% if page.page < page.pages %}
+                    <a href="{{ path('app_issues', {slug: project.slug}|merge(criteria.toQuery)|merge({page: page.page + 1})) }}" rel="next">{{ 'pager.older'|trans }}</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block bar %}
+    <tolemak-field label="{{ 'bar.issues'|trans }}">{{ page.total }}</tolemak-field>
+{% endblock %}

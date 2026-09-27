@@ -1,0 +1,20 @@
+<div class="frame{% if app %} frame--app{% endif %}">
+    <p class="frame__where">
+        <span class="frame__file">{{ frame.filename ?? frame.abs_path ?? frame.module ?? '?' }}</span>
+        {% if frame.function %}<span class="frame__fn">{{ frame.function }}</span>{% endif %}
+        {% if frame.lineno %}<span class="frame__line">:{{ frame.lineno }}{% if frame.colno %}:{{ frame.colno }}{% endif %}</span>{% endif %}
+    </p>
+    {% if frame.context_line %}
+        <ol class="code" start="{{ frame.lineno ? max(1, frame.lineno - frame.pre_context|length) : 1 }}">
+            {% for line in frame.pre_context %}<li>{{ line }}</li>{% endfor %}
+            <li class="code__current">{{ frame.context_line }}</li>
+            {% for line in frame.post_context %}<li>{{ line }}</li>{% endfor %}
+        </ol>
+    {% endif %}
+    {% if frame.vars is not empty %}
+        <details class="frame__vars">
+            <summary>{{ 'issue.variables'|trans }}</summary>
+            <pre class="json">{{ frame.vars|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_UNESCAPED_UNICODE')) }}</pre>
+        </details>
+    {% endif %}
+</div>

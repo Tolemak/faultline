@@ -1,0 +1,5 @@
+<nav class="crumbs" aria-label="{{ 'nav.breadcrumbs'|trans }}">
+    <a href="{{ path('app_projects') }}">{{ 'projects.title'|trans }}</a>
+    <a href="{{ path('app_issues', {slug: project.slug}) }}">{{ project.name }}</a>
+    <a href="{{ path('app_project_settings', {slug: project.slug}) }}"{% if active == 'settings' %} aria-current="page"{% endif %}>{{ 'projects.settings'|trans }}</a>
+</nav>

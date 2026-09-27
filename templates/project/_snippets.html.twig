@@ -1,0 +1,51 @@
+<div class="snippets">
+    <details open>
+        <summary>PHP · Symfony</summary>
+<pre><code>composer require sentry/sentry-symfony
+
+# .env.local
+SENTRY_DSN="{{ dsn }}"
+
+# config/packages/sentry.yaml
+sentry:
+    dsn: '%env(SENTRY_DSN)%'
+    options:
+        traces_sample_rate: 0</code></pre>
+    </details>
+    <details>
+        <summary>Node.js</summary>
+<pre><code>npm install @sentry/node
+
+const Sentry = require("@sentry/node");
+
+Sentry.init({
+  dsn: "{{ dsn }}",
+  environment: process.env.NODE_ENV,
+  tracesSampleRate: 0,
+});</code></pre>
+    </details>
+    <details>
+        <summary>{{ 'settings.snippet_browser'|trans }}</summary>
+<pre><code>npm install @sentry/browser
+
+import * as Sentry from "@sentry/browser";
+
+Sentry.init({
+  dsn: "{{ dsn }}",
+  tracesSampleRate: 0,
+});</code></pre>
+        <p class="hint">{{ 'settings.snippet_browser_hint'|trans }}</p>
+    </details>
+    <details>
+        <summary>Python</summary>
+<pre><code>pip install sentry-sdk
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="{{ dsn }}",
+    traces_sample_rate=0,
+    send_default_pii=False,
+)</code></pre>
+    </details>
+</div>

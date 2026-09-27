@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'projects.title'|trans }}{% endblock %}
+
+{% block body %}
+    <div class="page-head">
+        <h1>{{ 'projects.title'|trans }}</h1>
+        <p class="muted">{{ 'projects.subtitle'|trans }}</p>
+    </div>
+
+    {% if overviews is empty %}
+        <p class="empty">{{ 'projects.empty'|trans }}</p>
+    {% else %}
+        <ul class="stations">
+            {% for overview in overviews %}
+                {% set project = overview.project %}
+                <li class="station">
+                    <a class="station__link" href="{{ path('app_issues', {slug: project.slug}) }}">
+                        <span class="station__name">{{ project.name }}</span>
+                        <span class="station__slug">{{ project.slug }}</span>
+                    </a>
+                    <svg class="trace" viewBox="0 0 240 40" preserveAspectRatio="none" role="img" aria-label="{{ 'projects.trace_label'|trans({count: overview.eventsLastDay}) }}">
+                        <polyline points="{{ sparkline(overview.hourly, 240, 40) }}"/>
+                    </svg>
+                    <dl class="readings">
+                        <div><dt>{{ 'projects.open_issues'|trans }}</dt><dd>{{ overview.openIssues }}</dd></div>
+                        <div><dt>{{ 'projects.events_24h'|trans }}</dt><dd>{{ overview.eventsLastDay }}</dd></div>
+                    </dl>
+                    <a class="station__settings" href="{{ path('app_project_settings', {slug: project.slug}) }}">{{ 'projects.settings'|trans }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_project_create') }}" class="form form--inline">
+        <label class="field">
+            <span>{{ 'projects.new'|trans }}</span>
+            <input type="text" name="name" maxlength="100" required placeholder="{{ 'projects.new_placeholder'|trans }}">
+        </label>
+        <input type="hidden" name="_token" value="{{ csrf_token('project_create') }}">
+        <button type="submit" class="button">{{ 'projects.create'|trans }}</button>
+    </form>
+{% endblock %}
+
+{% block bar %}
+    <tolemak-field label="{{ 'bar.projects'|trans }}">{{ overviews|length }}</tolemak-field>
+{% endblock %}

@@ -1,15 +1,41 @@
 <!DOCTYPE html>
-<html lang="{{ app.request.locale|default('en') }}">
+<html lang="{{ app.request.locale }}"{% if ui_theme() %} data-theme="{{ ui_theme() }}"{% endif %}>
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{% block title %}Faultline{% endblock %}</title>
-        {% block stylesheets %}{% endblock %}
-        {% block javascripts %}
-            {% block importmap %}{{ importmap('app') }}{% endblock %}
-        {% endblock %}
+        <meta name="color-scheme" content="light dark">
+        <meta name="csp-nonce" content="{{ csp_nonce() }}">
+        <title>{% block title %}Faultline{% endblock %} · Faultline</title>
+        <link rel="icon" href="{{ asset('images/favicon.svg') }}" type="image/svg+xml">
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}">
+        {% block importmap %}{{ importmap('app', {nonce: csp_nonce()}) }}{% endblock %}
     </head>
     <body>
-        {% block body %}{% endblock %}
+        <header class="masthead">
+            <a class="brand" href="{{ path('app_projects') }}">
+                <svg class="brand__mark" viewBox="0 0 32 16" aria-hidden="true"><path d="M1 9h7l2-5 3 11 3-14 3 12 2-4h9"/></svg>
+                <span>faultline</span>
+            </a>
+            {% block breadcrumbs %}{% endblock %}
+            {% if app.user %}
+                <form class="masthead__logout" method="post" action="{{ path('app_logout') }}" data-turbo="false">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button type="submit" class="link-button">{{ 'nav.logout'|trans }}</button>
+                </form>
+            {% endif %}
+        </header>
+
+        <main class="page">
+            {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                    <p class="flash flash--{{ type }}" role="status">{{ message|trans }}</p>
+                {% endfor %}
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </main>
+
+        <tolemak-bar app="faultline" home="{{ path('app_projects') }}" langs="pl,en" theme-key="faultline-theme">
+            {% block bar %}{% endblock %}
+        </tolemak-bar>
     </body>
 </html>

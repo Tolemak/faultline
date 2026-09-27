@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'settings.title'|trans({name: project.name}) }}{% endblock %}
+
+{% block breadcrumbs %}{{ include('partials/project_nav.html.twig', {active: 'settings'}) }}{% endblock %}
+
+{% block body %}
+    <div class="page-head">
+        <h1>{{ 'settings.title'|trans({name: project.name}) }}</h1>
+    </div>
+
+    <section class="panel">
+        <h2>{{ 'settings.dsn'|trans }}</h2>
+        <div class="copy" data-controller="clipboard" data-clipboard-done-value="{{ 'settings.copied'|trans }}">
+            <input type="text" class="copy__value" value="{{ dsn }}" readonly data-clipboard-target="source" aria-label="{{ 'settings.dsn'|trans }}">
+            <button type="button" class="button" data-clipboard-target="button" data-action="clipboard#copy">{{ 'settings.copy'|trans }}</button>
+        </div>
+        <form method="post" action="{{ path('app_project_rotate_key', {slug: project.slug}) }}" data-turbo-confirm="{{ 'settings.rotate_confirm'|trans }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('project_rotate_key') }}">
+            <button type="submit" class="button button--danger">{{ 'settings.rotate'|trans }}</button>
+            <p class="hint">{{ 'settings.rotate_hint'|trans }}</p>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>{{ 'settings.general'|trans }}</h2>
+        <form method="post" class="form" novalidate>
+            <label class="field{% if errors.name is defined %} field--invalid{% endif %}">
+                <span>{{ 'settings.name'|trans }}</span>
+                <input type="text" name="name" value="{{ values.name }}" maxlength="100" required>
+                {% if errors.name is defined %}<em class="field__error">{{ errors.name|trans }}</em>{% endif %}
+            </label>
+            <label class="field{% if errors.origins is defined %} field--invalid{% endif %}">
+                <span>{{ 'settings.origins'|trans }}</span>
+                <textarea name="origins" rows="4" spellcheck="false">{{ values.origins }}</textarea>
+                <small class="hint">{{ 'settings.origins_hint'|trans }}</small>
+                {% if errors.origins is defined %}<em class="field__error">{{ errors.origins|trans }}</em>{% endif %}
+            </label>
+            <label class="field field--narrow{% if errors.retention is defined %} field--invalid{% endif %}">
+                <span>{{ 'settings.retention'|trans }}</span>
+                <input type="number" name="retention" value="{{ values.retention }}" min="1" max="365" inputmode="numeric" required>
+                {% if errors.retention is defined %}<em class="field__error">{{ errors.retention|trans }}</em>{% endif %}
+            </label>
+            <input type="hidden" name="_token" value="{{ csrf_token('project_settings') }}">
+            <button type="submit" class="button button--primary">{{ 'settings.save'|trans }}</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>{{ 'settings.snippets'|trans }}</h2>
+        <p class="hint">{{ 'settings.snippets_hint'|trans }}</p>
+        {{ include('project/_snippets.html.twig') }}
+    </section>
+{% endblock %}
