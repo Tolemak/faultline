@@ -8,6 +8,9 @@ use Symfony\Component\Runtime\SymfonyRuntime;
 
 final class Runtime extends SymfonyRuntime
 {
+    /**
+     * @param array<string, mixed> $options
+     */
     public function __construct(array $options = [])
     {
         $projectDir = $options['project_dir'] ?? null;
