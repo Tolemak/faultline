@@ -14,7 +14,7 @@ class Kernel extends BaseKernel
     /**
      * @return list<string>
      */
-    private function getAllowedEnvs(): array
+    protected function getAllowedEnvs(): array
     {
         return ['prod', 'dev', 'test'];
     }
