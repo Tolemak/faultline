@@ -17,7 +17,7 @@ final class EventNormalizer
     private const int MAX_CLOCK_SKEW = 3600;
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<mixed> $payload
      */
     public function normalize(string $eventId, array $payload, \DateTimeImmutable $receivedAt): NormalizedEvent
     {
@@ -62,7 +62,7 @@ final class EventNormalizer
     }
 
     /**
-     * @param array<string, mixed> $payload
+     * @param array<mixed> $payload
      *
      * @return array{?string, ?string}
      */

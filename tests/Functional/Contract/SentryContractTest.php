@@ -187,7 +187,6 @@ final class SentryContractTest extends WebTestCase
     private function processQueued(): void
     {
         $handler = self::getContainer()->get(ProcessEventHandler::class);
-        \assert($handler instanceof ProcessEventHandler);
 
         foreach ($this->transport()->getSent() as $envelope) {
             $message = $envelope->getMessage();
@@ -201,7 +200,7 @@ final class SentryContractTest extends WebTestCase
      */
     private function issues(): array
     {
-        return array_values($this->entityManager()->getRepository(Issue::class)->findBy(['project' => $this->project]));
+        return $this->entityManager()->getRepository(Issue::class)->findBy(['project' => $this->project]);
     }
 
     /**
@@ -209,14 +208,11 @@ final class SentryContractTest extends WebTestCase
      */
     private function events(): array
     {
-        return array_values($this->entityManager()->getRepository(Event::class)->findBy(['project' => $this->project], ['id' => 'ASC']));
+        return $this->entityManager()->getRepository(Event::class)->findBy(['project' => $this->project], ['id' => 'ASC']);
     }
 
     private function entityManager(): EntityManagerInterface
     {
-        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        \assert($entityManager instanceof EntityManagerInterface);
-
-        return $entityManager;
+        return self::getContainer()->get(EntityManagerInterface::class);
     }
 }

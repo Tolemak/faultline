@@ -54,9 +54,6 @@ final class ProjectCreateCommandTest extends KernelTestCase
 
     private function projects(): ProjectRepository
     {
-        $repository = self::getContainer()->get(ProjectRepository::class);
-        \assert($repository instanceof ProjectRepository);
-
-        return $repository;
+        return self::getContainer()->get(ProjectRepository::class);
     }
 }

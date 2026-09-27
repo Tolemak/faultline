@@ -28,7 +28,7 @@ class ProjectRepository extends ServiceEntityRepository
      */
     public function findAllOrdered(): array
     {
-        return array_values($this->findBy([], ['name' => 'ASC']));
+        return $this->findBy([], ['name' => 'ASC']);
     }
 
     public function save(Project $project): void

@@ -35,9 +35,7 @@ final class ProcessEventHandlerTest extends KernelTestCase
         self::getContainer()->set(IssueNotifierInterface::class, $this->notifier);
         $this->project = self::createProject(self::getContainer());
 
-        $entityManager = self::getContainer()->get(EntityManagerInterface::class);
-        \assert($entityManager instanceof EntityManagerInterface);
-        $this->entityManager = $entityManager;
+        $this->entityManager = self::getContainer()->get(EntityManagerInterface::class);
     }
 
     public function testCreatesAnIssueEventAndDailyCount(): void
@@ -146,10 +144,7 @@ final class ProcessEventHandlerTest extends KernelTestCase
 
     private function handler(): ProcessEventHandler
     {
-        $handler = self::getContainer()->get(ProcessEventHandler::class);
-        \assert($handler instanceof ProcessEventHandler);
-
-        return $handler;
+        return self::getContainer()->get(ProcessEventHandler::class);
     }
 
     /**
@@ -172,7 +167,7 @@ final class ProcessEventHandlerTest extends KernelTestCase
      */
     private function issues(): array
     {
-        return array_values($this->entityManager->getRepository(Issue::class)->findBy(['project' => $this->project]));
+        return $this->entityManager->getRepository(Issue::class)->findBy(['project' => $this->project]);
     }
 
     /**
@@ -180,6 +175,6 @@ final class ProcessEventHandlerTest extends KernelTestCase
      */
     private function events(): array
     {
-        return array_values($this->entityManager->getRepository(Event::class)->findBy(['project' => $this->project]));
+        return $this->entityManager->getRepository(Event::class)->findBy(['project' => $this->project]);
     }
 }

@@ -7,8 +7,8 @@ namespace App\Ingest\Envelope;
 final readonly class Envelope
 {
     /**
-     * @param array<string, mixed> $headers
-     * @param list<EnvelopeItem>   $items
+     * @param array<mixed>       $headers
+     * @param list<EnvelopeItem> $items
      */
     public function __construct(
         public array $headers,

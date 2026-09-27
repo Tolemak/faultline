@@ -15,10 +15,7 @@ trait ProjectFixtures
      */
     private static function createProject(ContainerInterface $container, string $name = 'Shop', array $origins = []): Project
     {
-        $manager = $container->get(ProjectManager::class);
-        \assert($manager instanceof ProjectManager);
-
-        return $manager->create($name, $origins);
+        return $container->get(ProjectManager::class)->create($name, $origins);
     }
 
     private static function projectId(Project $project): int

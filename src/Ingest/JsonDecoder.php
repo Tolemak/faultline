@@ -8,6 +8,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class JsonDecoder
 {
+    /**
+     * @param positive-int $maxDepth
+     */
     public function __construct(
         #[Autowire(param: 'faultline.ingest.json_max_depth')]
         private int $maxDepth,
@@ -15,7 +18,7 @@ final readonly class JsonDecoder
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     public function decodeObject(string $json): array
     {
@@ -29,11 +32,6 @@ final readonly class JsonDecoder
             throw IngestException::invalidPayload('JSON object expected.');
         }
 
-        $object = [];
-        foreach ($data as $key => $value) {
-            $object[(string) $key] = $value;
-        }
-
-        return $object;
+        return $data;
     }
 }

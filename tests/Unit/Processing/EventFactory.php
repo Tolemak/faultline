@@ -10,7 +10,7 @@ use App\Processing\NormalizedEvent;
 final class EventFactory
 {
     /**
-     * @param array<string, mixed> $payload
+     * @param array<mixed> $payload
      */
     public static function normalized(array $payload): NormalizedEvent
     {
