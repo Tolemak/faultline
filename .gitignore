@@ -12,3 +12,4 @@
 /.php-cs-fixer.cache
 /phpunit.xml
 /.phpunit.cache/
+/container/.env

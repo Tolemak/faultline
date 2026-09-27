@@ -1,0 +1,54 @@
+name: faultline
+
+x-app: &app
+  image: faultline:latest
+  restart: unless-stopped
+  env_file: .env
+  environment:
+    APP_ENV: prod
+    APP_DEBUG: "0"
+    DATABASE_URL: "postgresql://${POSTGRES_USER:?}:${POSTGRES_PASSWORD:?}@db:5432/${POSTGRES_DB:?}?serverVersion=18&charset=utf8"
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  web:
+    <<: *app
+    build:
+      context: ..
+      dockerfile: container/Dockerfile
+    ports:
+      - "127.0.0.1:${FAULTLINE_PORT:?}:80"
+    mem_limit: 160m
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(false === @file_get_contents('http://127.0.0.1/health') ? 1 : 0);"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    <<: *app
+    user: www-data
+    command: ["php", "bin/console", "messenger:consume", "async", "--memory-limit=64M", "--time-limit=3600"]
+    mem_limit: 96m
+
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    command: ["postgres", "-c", "shared_buffers=32MB", "-c", "max_connections=20", "-c", "work_mem=2MB"]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:?}", "-U", "${POSTGRES_USER:?}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql
+    mem_limit: 128m
+
+volumes:
+  db_data:

@@ -1,0 +1,13 @@
+.git
+.github
+.env.local
+.env.*.local
+.phpunit.cache
+.php-cs-fixer.cache
+assets/vendor
+container/.env
+public/assets
+public/bundles
+tests
+var
+vendor
