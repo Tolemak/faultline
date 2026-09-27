@@ -9,6 +9,10 @@ security:
         dev:
             pattern: ^/(_profiler|_wdt|assets)/
             security: false
+        api:
+            pattern: ^/api/
+            stateless: true
+            security: false
         main:
             lazy: true
             provider: users_in_memory

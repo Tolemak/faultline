@@ -1,4 +1,8 @@
 parameters:
+    faultline.ingest.max_wire_bytes: 1048576
+    faultline.ingest.max_inflated_bytes: 8388608
+    faultline.ingest.json_max_depth: 64
+    faultline.ingest.envelope_max_items: 100
 
 services:
     _defaults:
@@ -7,3 +11,14 @@ services:
 
     App\:
         resource: '../src/'
+        exclude:
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Message/'
+            - '../src/Processing/NormalizedEvent.php'
+            - '../src/Processing/RecordedEvent.php'
+            - '../src/Processing/IssueSummary.php'
+            - '../src/Ingest/Envelope/Envelope.php'
+            - '../src/Ingest/Envelope/EnvelopeItem.php'
+
+    App\Notification\IssueNotifierInterface: '@App\Notification\NullIssueNotifier'
