@@ -57,6 +57,9 @@ class Issue
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $lastNotifiedAt = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $regressedAt = null;
+
     public function __construct(Project $project, string $fingerprint, string $title, ?string $culprit, Level $level, \DateTimeImmutable $seenAt)
     {
         $this->project = $project;
@@ -128,6 +131,11 @@ class Issue
         return $this->lastNotifiedAt;
     }
 
+    public function getRegressedAt(): ?\DateTimeImmutable
+    {
+        return $this->regressedAt;
+    }
+
     public function markNotified(\DateTimeImmutable $at): void
     {
         $this->lastNotifiedAt = $at;
@@ -152,6 +160,7 @@ class Issue
 
         if (IssueStatus::Resolved === $this->status) {
             $this->status = IssueStatus::Unresolved;
+            $this->regressedAt = $seenAt;
 
             return true;
         }

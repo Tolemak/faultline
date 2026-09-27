@@ -31,8 +31,10 @@ final class IssueTest extends TestCase
 
         $issue->resolve();
         self::assertSame(IssueStatus::Resolved, $issue->getStatus());
+        self::assertNull($issue->getRegressedAt());
         self::assertTrue($issue->recordEvent('t', null, Level::Error, null, new \DateTimeImmutable('2026-09-03')));
         self::assertSame(IssueStatus::Unresolved, $issue->getStatus());
+        self::assertEquals(new \DateTimeImmutable('2026-09-03'), $issue->getRegressedAt());
     }
 
     public function testIgnoredIssuesStayIgnored(): void
