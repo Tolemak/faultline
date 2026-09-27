@@ -61,7 +61,7 @@ Before anything is stored: keys matching `password|passwd|secret|token|api_?key|
 - Telegram notifier: new issue and regression, one message per issue per hour at most, token and chat id from env. Disabled when unset.
 - `GET /api/digest` behind a bearer token from env: new issues, regressions and top issues from the last 24h as JSON. The home assistant bot reads it for its morning report.
 - Postgres tuned for a small box (`shared_buffers=32MB`, `max_connections=20`, `work_mem=2MB`). Memory limits: web 160M, worker 96M, db 128M. Worker restarts with `--memory-limit=64M --time-limit=3600`.
-- Port `127.0.0.1:PORT`, Apache on the host proxies to it. Nothing about the server (host, port, paths) goes into the repo.
+- Bound to `127.0.0.1` on a port from env, Apache on the host proxies to it. Nothing about the server (host, port, paths) goes into the repo.
 
 ## Security checklist
 
