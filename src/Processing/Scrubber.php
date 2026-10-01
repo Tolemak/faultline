@@ -8,7 +8,7 @@ final class Scrubber
 {
     public const string FILTERED = '[filtered]';
 
-    private const string SENSITIVE_KEY = '/password|passwd|secret|token|api[-_]?key|auth|cookie|session|csrf|dsn|private/i';
+    private const string SENSITIVE_KEY = '/password|passwd|secret|token|api[-_]?key|(?<![a-zA-Z\d])auth(?![a-zA-Z\d])|authori[sz]ation|basic[-_]?auth|bearer|cookie|session|csrf|dsn|private/i';
     private const array DROPPED_HEADERS = ['authorization', 'cookie', 'set-cookie', 'proxy-authorization'];
     private const string CARD_CANDIDATE = '/(?<![\d])(?:\d[ -]?){12,18}\d(?![\d])/';
     private const string IBAN_CANDIDATE = '/\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]){11,30}\b/';
@@ -186,6 +186,7 @@ final class Scrubber
                 $frames[] = $frame;
             }
 
+            $exception['type'] = null === $exception['type'] ? null : $this->scrubString($exception['type']);
             $exception['value'] = null === $exception['value'] ? null : $this->scrubString($exception['value']);
             $exception['frames'] = $frames;
             $scrubbed[] = $exception;

@@ -111,4 +111,68 @@ final class ScrubberTest extends TestCase
         self::assertNull($empty->request);
         self::assertNull($empty->user);
     }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function authSensitiveKeys(): iterable
+    {
+        foreach (['auth', 'auth_token', 'x-auth-token', 'Authorization', 'authorisation', 'X-Auth', 'AUTH', 'basicAuth', 'basic_auth', 'bearer'] as $key) {
+            yield $key => [$key];
+        }
+    }
+
+    #[DataProvider('authSensitiveKeys')]
+    public function testAuthKeyIsSensitiveAsSegment(string $key): void
+    {
+        self::assertTrue((new Scrubber())->isSensitiveKey($key));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function authNonSensitiveKeys(): iterable
+    {
+        foreach (['author', 'author_id', 'authority', 'oauth_provider_name', 'oauth', 'coauthor'] as $key) {
+            yield $key => [$key];
+        }
+    }
+
+    #[DataProvider('authNonSensitiveKeys')]
+    public function testAuthKeyIsNotSensitiveWhenNotASegment(string $key): void
+    {
+        self::assertFalse((new Scrubber())->isSensitiveKey($key));
+    }
+
+    public function testExceptionTypeScrubbed(): void
+    {
+        $event = EventFactory::normalized([
+            'exception' => ['values' => [[
+                'type' => 'Error 4111 1111 1111 1111',
+                'value' => 'IBAN DE89370400440532013000 found',
+                'stacktrace' => ['frames' => []],
+            ]]],
+        ]);
+
+        $scrubbed = (new Scrubber())->scrubEvent($event);
+
+        self::assertSame('Error [card]', $scrubbed->exceptions[0]['type']);
+        self::assertSame('IBAN [iban] found', $scrubbed->exceptions[0]['value']);
+    }
+
+    public function testExceptionTypeNullPassthrough(): void
+    {
+        $event = EventFactory::normalized([
+            'exception' => ['values' => [[
+                'type' => null,
+                'value' => null,
+                'stacktrace' => ['frames' => []],
+            ]]],
+        ]);
+
+        $scrubbed = (new Scrubber())->scrubEvent($event);
+
+        self::assertNull($scrubbed->exceptions[0]['type']);
+        self::assertNull($scrubbed->exceptions[0]['value']);
+    }
 }
