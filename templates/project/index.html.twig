@@ -38,7 +38,7 @@
             <input type="text" name="name" maxlength="100" required placeholder="{{ 'projects.new_placeholder'|trans }}">
         </label>
         <input type="hidden" name="_token" value="{{ csrf_token('project_create') }}">
-        <button type="submit" class="button">{{ 'projects.create'|trans }}</button>
+        <button type="submit" class="button"{{ demo_mode() ? ' disabled' }}>{{ 'projects.create'|trans }}</button>
     </form>
 {% endblock %}
 

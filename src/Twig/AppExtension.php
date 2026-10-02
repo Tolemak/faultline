@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twig;
 
+use App\Demo\DemoMode;
 use App\Http\CspNonce;
 use App\Http\Preferences;
 use Psr\Clock\ClockInterface;
@@ -19,6 +20,7 @@ final readonly class AppExtension
         private RequestStack $requests,
         private TranslatorInterface $translator,
         private ClockInterface $clock,
+        private DemoMode $demo,
     ) {
     }
 
@@ -26,6 +28,12 @@ final readonly class AppExtension
     public function cspNonce(): string
     {
         return $this->nonce->get();
+    }
+
+    #[AsTwigFunction('demo_mode')]
+    public function demoMode(): bool
+    {
+        return $this->demo->isEnabled();
     }
 
     #[AsTwigFunction('ui_theme')]

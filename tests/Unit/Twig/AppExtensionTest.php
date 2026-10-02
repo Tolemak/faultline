@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Twig;
 
+use App\Demo\DemoMode;
 use App\Http\CspNonce;
 use App\Twig\AppExtension;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -67,6 +68,6 @@ final class AppExtensionTest extends TestCase
 
     private function extension(?RequestStack $requests = null): AppExtension
     {
-        return new AppExtension(new CspNonce(), $requests ?? new RequestStack(), new IdentityTranslator(), new MockClock('2026-09-27 12:00:00'));
+        return new AppExtension(new CspNonce(), $requests ?? new RequestStack(), new IdentityTranslator(), new MockClock('2026-09-27 12:00:00'), new DemoMode(false));
     }
 }

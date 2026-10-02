@@ -7,6 +7,7 @@ parameters:
     env(TELEGRAM_BOT_TOKEN): ''
     env(TELEGRAM_CHAT_ID): ''
     env(DIGEST_TOKEN): ''
+    env(FAULTLINE_DEMO): '0'
     faultline.ingest.max_wire_bytes: 1048576
     faultline.ingest.max_inflated_bytes: 8388608
     faultline.ingest.json_max_depth: 64

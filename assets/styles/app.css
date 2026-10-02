@@ -187,6 +187,7 @@ pre { margin: 0; white-space: pre-wrap; word-break: break-word; }
 
 .flash { margin: 0 0 1rem; padding: 0.6rem 0.8rem; border-left: 3px solid var(--accent); background: var(--paper-raised); }
 .flash--error { border-left-color: var(--pen); }
+.flash--demo { font-size: 0.9rem; }
 
 .panel {
     margin: 1.25rem 0;

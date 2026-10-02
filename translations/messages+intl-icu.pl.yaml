@@ -112,3 +112,8 @@ time:
     minutes_ago: '{count, plural, one {# minutę temu} few {# minuty temu} other {# minut temu}}'
     hours_ago: '{count, plural, one {# godzinę temu} few {# godziny temu} other {# godzin temu}}'
     days_ago: '{count, plural, one {# dzień temu} other {# dni temu}}'
+demo:
+    banner: Demo tylko do odczytu, dane są syntetyczne. Resetuje się co noc.
+    intro: To publiczne demo Faultline z syntetycznymi projektami i zdarzeniami. Bez rejestracji.
+    enter: Wejdź do demo
+    read_only: Demo jest tylko do odczytu.

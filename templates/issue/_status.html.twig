@@ -3,10 +3,10 @@
     <form method="post" action="{{ path('app_issue_status', {slug: project.slug, id: issue.id}) }}" class="status__actions">
         <input type="hidden" name="_token" value="{{ csrf_token('issue_status_' ~ issue.id) }}">
         {% if issue.status.value == 'unresolved' %}
-            <button type="submit" name="action" value="resolve" class="button button--primary">{{ 'issue.resolve'|trans }}</button>
-            <button type="submit" name="action" value="ignore" class="button">{{ 'issue.ignore'|trans }}</button>
+            <button type="submit" name="action" value="resolve" class="button button--primary"{{ demo_mode() ? ' disabled' }}>{{ 'issue.resolve'|trans }}</button>
+            <button type="submit" name="action" value="ignore" class="button"{{ demo_mode() ? ' disabled' }}>{{ 'issue.ignore'|trans }}</button>
         {% else %}
-            <button type="submit" name="action" value="reopen" class="button">{{ 'issue.reopen'|trans }}</button>
+            <button type="submit" name="action" value="reopen" class="button"{{ demo_mode() ? ' disabled' }}>{{ 'issue.reopen'|trans }}</button>
         {% endif %}
     </form>
 </div>

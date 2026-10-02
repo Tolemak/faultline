@@ -44,11 +44,16 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 | `faultline:project:create <nazwa> [--origin=…] [--retention=30]` | Tworzy projekt i wypisuje DSN |
 | `faultline:project:rotate-key <slug>` | Wymienia klucz i wypisuje nowy DSN |
 | `faultline:purge` | Usuwa zdarzenia po retencji i puste problemy |
+| `faultline:demo:seed` | Czyści bazę i wgrywa syntetyczne dane demo (tylko z `FAULTLINE_DEMO=1`) |
 
 ## Integracje
 
 - Telegram: ustaw `TELEGRAM_BOT_TOKEN` i `TELEGRAM_CHAT_ID`, żeby dostawać nowe problemy i regresje, najwyżej jedną wiadomość na problem na godzinę.
 - Digest: ustaw `DIGEST_TOKEN` (min. 16 znaków) i wołaj `GET /api/digest` z nagłówkiem `Authorization: Bearer <token>`.
+
+## Instancja demo
+
+Ustaw `FAULTLINE_DEMO=1` na osobnej instancji z własną bazą. Wtedy `/login` daje wejście do demo jednym kliknięciem, każdy zapis jest odrzucany, `/api/*` zwraca 404, a `faultline:demo:seed` (uruchamiany co noc) wgrywa trzy syntetyczne projekty z 14 dniami zdarzeń. Na jednym serwerze klon demo dostaje własny `container/.env` z `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` i wolnym `FAULTLINE_PORT`. Nigdy nie podpinaj prawdziwych aplikacji pod instancję demo.
 
 ## Testy
 

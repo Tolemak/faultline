@@ -1,7 +1,7 @@
 name: faultline
 
 x-app: &app
-  image: faultline:latest
+  image: ${FAULTLINE_IMAGE:-faultline}:latest
   restart: unless-stopped
   env_file: .env
   environment:

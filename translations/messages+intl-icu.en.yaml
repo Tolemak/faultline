@@ -112,3 +112,8 @@ time:
     minutes_ago: '{count, plural, one {# minute ago} other {# minutes ago}}'
     hours_ago: '{count, plural, one {# hour ago} other {# hours ago}}'
     days_ago: '{count, plural, one {# day ago} other {# days ago}}'
+demo:
+    banner: Read-only demo with synthetic data. It resets every night.
+    intro: This is a public demo of Faultline with synthetic projects and events. No sign-up needed.
+    enter: Enter the demo
+    read_only: The demo is read-only.

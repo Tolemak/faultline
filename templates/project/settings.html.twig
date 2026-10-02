@@ -17,7 +17,7 @@
         </div>
         <form method="post" action="{{ path('app_project_rotate_key', {slug: project.slug}) }}" data-turbo-confirm="{{ 'settings.rotate_confirm'|trans }}">
             <input type="hidden" name="_token" value="{{ csrf_token('project_rotate_key') }}">
-            <button type="submit" class="button button--danger">{{ 'settings.rotate'|trans }}</button>
+            <button type="submit" class="button button--danger"{{ demo_mode() ? ' disabled' }}>{{ 'settings.rotate'|trans }}</button>
             <p class="hint">{{ 'settings.rotate_hint'|trans }}</p>
         </form>
     </section>
@@ -42,7 +42,7 @@
                 {% if errors.retention is defined %}<em class="field__error">{{ errors.retention|trans }}</em>{% endif %}
             </label>
             <input type="hidden" name="_token" value="{{ csrf_token('project_settings') }}">
-            <button type="submit" class="button button--primary">{{ 'settings.save'|trans }}</button>
+            <button type="submit" class="button button--primary"{{ demo_mode() ? ' disabled' }}>{{ 'settings.save'|trans }}</button>
         </form>
     </section>
 
