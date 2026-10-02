@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notification;
 
 use App\Entity\Issue;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\IssueRepository;
 use Psr\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\AsAlias;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -18,7 +18,7 @@ final readonly class ThrottledIssueNotifier implements IssueNotifierInterface
     public function __construct(
         #[Autowire(service: TelegramNotifier::class)]
         private IssueNotifierInterface $inner,
-        private EntityManagerInterface $entityManager,
+        private IssueRepository $issues,
         private ClockInterface $clock,
     ) {
     }
@@ -33,7 +33,6 @@ final readonly class ThrottledIssueNotifier implements IssueNotifierInterface
         }
 
         $this->inner->notify($issue, $change);
-        $issue->markNotified($now);
-        $this->entityManager->flush();
+        $this->issues->markNotified($issue, $now);
     }
 }

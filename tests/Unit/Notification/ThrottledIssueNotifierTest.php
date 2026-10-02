@@ -9,8 +9,8 @@ use App\Entity\Project;
 use App\Enum\Level;
 use App\Notification\IssueChange;
 use App\Notification\ThrottledIssueNotifier;
+use App\Repository\IssueRepository;
 use App\Tests\Support\NotifierSpy;
-use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Clock\MockClock;
 
@@ -20,9 +20,9 @@ final class ThrottledIssueNotifierTest extends TestCase
     {
         $spy = new NotifierSpy();
         $clock = new MockClock('2026-09-27 10:00:00');
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $entityManager->expects(self::exactly(3))->method('flush');
-        $notifier = new ThrottledIssueNotifier($spy, $entityManager, $clock);
+        $issues = $this->createMock(IssueRepository::class);
+        $issues->expects(self::exactly(3))->method('markNotified')->willReturnCallback(static fn (Issue $issue, \DateTimeImmutable $at) => $issue->markNotified($at));
+        $notifier = new ThrottledIssueNotifier($spy, $issues, $clock);
         $issue = $this->issue();
         $other = $this->issue();
 
