@@ -6,6 +6,7 @@ namespace App\Repository;
 
 use App\Entity\Issue;
 use App\Entity\Project;
+use App\Enum\IssueStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
@@ -37,5 +38,31 @@ class IssueRepository extends ServiceEntityRepository
             ->execute();
 
         $issue->markNotified($at);
+    }
+
+    /**
+     * @return list<Issue>
+     */
+    public function findForListing(?Project $project, ?\DateTimeImmutable $since, bool $bySinceFirstSeen, ?IssueStatus $status, int $limit): array
+    {
+        $builder = $this->createQueryBuilder('i')
+            ->addSelect('p')
+            ->join('i.project', 'p')
+            ->orderBy('i.lastSeen', 'DESC')
+            ->addOrderBy('i.id', 'DESC')
+            ->setMaxResults($limit);
+
+        if (null !== $project) {
+            $builder->andWhere('i.project = :project')->setParameter('project', $project);
+        }
+        if (null !== $since) {
+            $builder->andWhere($bySinceFirstSeen ? 'i.firstSeen >= :since' : 'i.lastSeen >= :since')
+                ->setParameter('since', $since, Types::DATETIME_IMMUTABLE);
+        }
+        if (null !== $status) {
+            $builder->andWhere('i.status = :status')->setParameter('status', $status);
+        }
+
+        return $builder->getQuery()->getResult();
     }
 }

@@ -43,6 +43,7 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 | `faultline:user:create <username>` | Create the admin or reset its password |
 | `faultline:project:create <name> [--origin=…] [--retention=30]` | Create a project and print its DSN |
 | `faultline:project:rotate-key <slug>` | Replace the key and print the new DSN |
+| `faultline:issues:list [--project=<slug>] [--since=24h] [--new] [--status=…] [--limit=50] [--format=table\|json]` | List issues (metadata only, never event payloads) for a review from the shell; `--since` takes an ISO date or an age (`90m`, `24h`, `7d`), `--new` applies it to first seen |
 | `faultline:purge` | Delete events past retention and empty issues |
 | `faultline:demo:seed` | Wipe the database and load synthetic demo data (only with `FAULTLINE_DEMO=1`) |
 
