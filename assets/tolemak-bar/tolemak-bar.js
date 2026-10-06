@@ -1,6 +1,8 @@
-// Shared status bar for all Tolemak apps: <tolemak-bar> with <tolemak-field> children.
-// Plain custom elements with no dependencies, so the same file works in React, Twig and static pages.
-// Colors come from the host page through --tb-* custom properties.
+/**
+ * Shared status bar for all Tolemak apps: <tolemak-bar> with <tolemak-field> children.
+ * Plain custom elements with no dependencies, so the same file works in React, Twig and static pages.
+ * Colors come from the host page through --tb-* custom properties.
+ */
 
 const MARK =
   '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M4.6 5h6.8M8 5v6.4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -46,7 +48,9 @@ const FIELD_CSS = `
 :host([tone="error"]) .value { color: var(--tb-error, #ff5d5d); }
 `;
 
-// Constructed stylesheets instead of <style> tags, so the bar also works under a strict style-src CSP.
+/**
+ * Constructed stylesheets are used instead of <style> tags, so the bar also works under a strict style-src CSP.
+ */
 function sheet(css) {
   const result = new CSSStyleSheet();
   result.replaceSync(css);
@@ -62,6 +66,18 @@ function rootTheme() {
 
 function pageLang() {
   return document.documentElement.lang.toLowerCase().startsWith("en") ? "en" : "pl";
+}
+
+/**
+ * Storage can be disabled; the choice then lasts until reload.
+ */
+function storeTheme(key, theme) {
+  try {
+    localStorage.setItem(key, theme);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 class TolemakBar extends HTMLElement {
@@ -98,7 +114,9 @@ class TolemakBar extends HTMLElement {
     this.render();
   }
 
-  // A method, not a getter: React 19 assigns attributes as properties when the element has one of that name.
+  /**
+   * A method, not a getter: React 19 assigns attributes as properties when the element has one of that name.
+   */
   langList() {
     return (this.getAttribute("langs") ?? "").split(",").map((l) => l.trim()).filter(Boolean);
   }
@@ -116,20 +134,20 @@ class TolemakBar extends HTMLElement {
     this.langEl.setAttribute("aria-label", text.lang);
   }
 
-  // Apps with their own theme state cancel the event and apply the theme themselves.
+  /**
+   * Apps with their own theme state cancel the "tolemak-theme" event and apply the theme themselves.
+   */
   toggleTheme() {
     const theme = rootTheme() === "dark" ? "light" : "dark";
     const event = new CustomEvent("tolemak-theme", { detail: { theme }, bubbles: true, cancelable: true });
     if (!this.dispatchEvent(event)) return;
     document.documentElement.dataset.theme = theme;
-    try {
-      localStorage.setItem(this.getAttribute("theme-key") ?? "theme", theme);
-    } catch {
-      // storage disabled - the choice lasts until reload
-    }
+    storeTheme(this.getAttribute("theme-key") ?? "theme", theme);
   }
 
-  // Language needs the app's own translations, so the bar only announces the choice.
+  /**
+   * Language needs the app's own translations, so the bar only announces the choice.
+   */
   nextLang() {
     const langs = this.langList();
     const lang = langs[(langs.indexOf(pageLang()) + 1) % langs.length];
