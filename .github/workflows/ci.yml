@@ -108,6 +108,6 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
           echo "::add-mask::${DEPLOY_TARGET#*@}"
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o ServerAliveInterval=30 -o ServerAliveCountMax=60 -o ConnectTimeout=20 -o LogLevel=ERROR \
+          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o ServerAliveInterval=30 -o ServerAliveCountMax=60 -o ConnectTimeout=60 -o ConnectionAttempts=3 -o LogLevel=ERROR \
             -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
             "$DEPLOY_TARGET" faultline
