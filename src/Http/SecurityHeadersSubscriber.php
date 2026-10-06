@@ -40,5 +40,6 @@ final readonly class SecurityHeadersSubscriber
         $headers->set('Referrer-Policy', 'same-origin');
         $headers->set('X-Frame-Options', 'DENY');
         $headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        $headers->set('Strict-Transport-Security', 'max-age=31536000');
     }
 }

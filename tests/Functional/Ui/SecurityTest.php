@@ -51,6 +51,7 @@ final class SecurityTest extends WebTestCase
         self::assertMatchesRegularExpression("/script-src 'self' 'nonce-[A-Za-z0-9+\\/=]+'/", $csp);
         self::assertStringContainsString("frame-ancestors 'none'", $csp);
         self::assertResponseHeaderSame('X-Content-Type-Options', 'nosniff');
+        self::assertResponseHeaderSame('Strict-Transport-Security', 'max-age=31536000');
 
         $html = (string) $this->client->getResponse()->getContent();
         self::assertDoesNotMatchRegularExpression('/<style\b/i', $html);
