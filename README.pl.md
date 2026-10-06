@@ -51,6 +51,17 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 - Telegram: ustaw `TELEGRAM_BOT_TOKEN` i `TELEGRAM_CHAT_ID`, żeby dostawać nowe problemy i regresje, najwyżej jedną wiadomość na problem na godzinę.
 - Digest: ustaw `DIGEST_TOKEN` (min. 16 znaków) i wołaj `GET /api/digest` z nagłówkiem `Authorization: Bearer <token>`.
 
+## Pasek statusu
+
+`assets/tolemak-bar/tolemak-bar.js` to wspólny pasek statusu wszystkich aplikacji Tolemak: element `<tolemak-bar>` z dziećmi `<tolemak-field>`.
+
+- Zwykłe custom elements bez zależności, więc ten sam plik działa w React, Twig i na stronach statycznych.
+- Kolory pochodzą ze strony hosta przez własne właściwości `--tb-*`.
+- Style to constructed stylesheets zamiast tagów `<style>`, więc pasek działa też przy restrykcyjnym CSP `style-src`.
+- `langList()` jest metodą, nie getterem: React 19 przypisuje atrybuty jako właściwości, gdy element ma właściwość o tej nazwie.
+- Aplikacje z własnym stanem motywu anulują zdarzenie `tolemak-theme` i same stosują motyw; w przeciwnym razie pasek ustawia `data-theme` i zapisuje wybór w `localStorage`. Przy wyłączonym storage wybór trwa do przeładowania.
+- Język wymaga tłumaczeń aplikacji, więc pasek tylko ogłasza wybór.
+
 ## Instancja demo
 
 Ustaw `FAULTLINE_DEMO=1` na osobnej instancji z własną bazą. Wtedy `/login` daje wejście do demo jednym kliknięciem, każdy zapis jest odrzucany, `/api/*` zwraca 404, a `faultline:demo:seed` (uruchamiany co noc) wgrywa trzy syntetyczne projekty z 14 dniami zdarzeń. Na jednym serwerze klon demo dostaje własny `container/.env` z `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` i wolnym `FAULTLINE_PORT`. Nigdy nie podpinaj prawdziwych aplikacji pod instancję demo.

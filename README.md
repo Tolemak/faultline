@@ -51,6 +51,17 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 - Telegram: set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to get new issues and regressions, at most one message per issue per hour.
 - Digest: set `DIGEST_TOKEN` (16+ characters) and call `GET /api/digest` with `Authorization: Bearer <token>`.
 
+## Status bar
+
+`assets/tolemak-bar/tolemak-bar.js` is the shared status bar for all Tolemak apps: a `<tolemak-bar>` element with `<tolemak-field>` children.
+
+- Plain custom elements with no dependencies, so the same file works in React, Twig and static pages.
+- Colors come from the host page through `--tb-*` custom properties.
+- Styles are constructed stylesheets instead of `<style>` tags, so the bar also works under a strict `style-src` CSP.
+- `langList()` is a method, not a getter: React 19 assigns attributes as properties when the element has one of that name.
+- Apps with their own theme state cancel the `tolemak-theme` event and apply the theme themselves; otherwise the bar sets `data-theme` and stores the choice in `localStorage`. With storage disabled the choice lasts until reload.
+- Language needs the app's own translations, so the bar only announces the choice.
+
 ## Demo instance
 
 Set `FAULTLINE_DEMO=1` on a separate instance with its own database. Then `/login` offers a one-click demo login, every write is refused, `/api/*` returns 404 and `faultline:demo:seed` (run it nightly) loads three synthetic projects with 14 days of events. On one host, give the demo clone its own `container/.env` with `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` and a free `FAULTLINE_PORT`. Never point real apps at a demo instance.
