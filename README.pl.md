@@ -1,6 +1,10 @@
 # Faultline
 
+[![CI](https://github.com/Tolemak/faultline/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Tolemak/faultline/actions/workflows/ci.yml)
+
 Własny tracker błędów dla moich aplikacji. Rozumie protokół Sentry, więc aplikacje zostają przy oficjalnych SDK Sentry i zmieniają tylko DSN. Symfony 8, PostgreSQL, Messenger.
+
+Demo na żywo (tylko do odczytu, logowanie jednym kliknięciem): [faultline-demo.tolemak.pl](https://faultline-demo.tolemak.pl/demo)
 
 [English version](README.md)
 
