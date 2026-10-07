@@ -35,7 +35,7 @@ jobs:
       DATABASE_URL: postgresql://faultline:faultline@127.0.0.1:5432/faultline?serverVersion=18&charset=utf8
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: shivammathur/setup-php@v2
         with:
@@ -48,7 +48,7 @@ jobs:
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
@@ -94,7 +94,7 @@ jobs:
       IMAGE: ghcr.io/tolemak/faultline
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build the application image
         run: docker build -f container/Dockerfile -t faultline-base .
