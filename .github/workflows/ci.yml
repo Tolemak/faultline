@@ -80,34 +80,53 @@ jobs:
       - name: Coverage gate
         run: php bin/check-coverage.php var/coverage/clover.xml 80
 
-  deploy:
+  image:
     needs: checks
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    concurrency:
-      group: deploy
-      cancel-in-progress: false
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
     env:
-      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      IMAGE: ghcr.io/tolemak/faultline
 
     steps:
-      - name: Skip without deploy credentials
-        if: env.DEPLOY_SSH_KEY == ''
-        run: echo "DEPLOY_SSH_KEY is not set, skipping deploy."
+      - uses: actions/checkout@v5
 
-      - name: Deploy
-        if: env.DEPLOY_SSH_KEY != ''
-        env:
-          DEPLOY_TARGET: ${{ secrets.DEPLOY_TARGET }}
-          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      - name: Build the application image
+        run: docker build -f container/Dockerfile -t faultline-base .
+
+      - name: Build the runtime image
+        run: >
+          docker build --provenance=false -f container/Dockerfile.runtime
+          --label org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          --label org.opencontainers.image.revision=${{ github.sha }}
+          -t "$IMAGE:${{ github.sha }}" -t "$IMAGE:latest" container
+
+      - name: Smoke test the image
+        run: >
+          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges:true
+          --user 12345:12345 "$IMAGE:${{ github.sha }}" sh -c
+          'php -m | grep -q pdo_pgsql && php -r "require \"/app/vendor/autoload.php\";"
+          && test -r /app/composer.json && test ! -w /app/composer.json
+          && . /etc/apache2/envvars && apache2 -t'
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Push
+        id: push
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          echo "::add-mask::${DEPLOY_TARGET#*@}"
-          ssh -i ~/.ssh/deploy_key -p "$DEPLOY_PORT" -o ServerAliveInterval=30 -o ServerAliveCountMax=60 -o ConnectTimeout=20 -o LogLevel=ERROR \
-            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
-            "$DEPLOY_TARGET" faultline
+          docker push --quiet "$IMAGE:${{ github.sha }}"
+          docker push --quiet "$IMAGE:latest"
+          echo "digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}" | cut -d@ -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
