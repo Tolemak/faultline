@@ -28,7 +28,7 @@ cp .env.example container/.env
 container/deploy.sh
 ```
 
-`web` nasłuchuje na `127.0.0.1:$FAULTLINE_PORT`, przed nim reverse proxy z TLS. Migracje uruchamia `deploy.sh`, nie start kontenera. CI wdraża pushe na `main`, gdy ustawione są sekrety `DEPLOY_*`.
+`web` nasłuchuje na `127.0.0.1:$FAULTLINE_PORT`, przed nim reverse proxy z TLS. Migracje uruchamia `deploy.sh`, nie start kontenera. Po zielonych testach na `main` CI publikuje też gotowy obraz `ghcr.io/tolemak/faultline:<sha commita>` (i `:latest`): pełny build plus Apache bez roota na porcie 8080 (`container/Dockerfile.runtime`), z podpisanym poświadczeniem pochodzenia builda. Serwer może go pobrać i sprawdzić przez `gh attestation verify` zamiast budować; CI nigdy nie łączy się z serwerem.
 
 Codzienny cron na hoście:
 

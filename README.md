@@ -28,7 +28,7 @@ cp .env.example container/.env
 container/deploy.sh
 ```
 
-`web` binds to `127.0.0.1:$FAULTLINE_PORT`; put a reverse proxy with TLS in front of it. Migrations run in `deploy.sh`, not on container start. CI deploys pushes to `main` when the `DEPLOY_*` secrets are set.
+`web` binds to `127.0.0.1:$FAULTLINE_PORT`; put a reverse proxy with TLS in front of it. Migrations run in `deploy.sh`, not on container start. After the checks pass on `main`, CI also publishes a ready-to-run image `ghcr.io/tolemak/faultline:<commit sha>` (and `:latest`): the full build plus a non-root Apache on port 8080 (`container/Dockerfile.runtime`), with a signed build provenance attestation. A server can pull it and check it with `gh attestation verify` instead of building; CI never connects to the server.
 
 Daily cron on the host:
 
