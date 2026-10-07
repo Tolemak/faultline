@@ -82,7 +82,7 @@ jobs:
 
   image:
     needs: checks
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -107,17 +107,26 @@ jobs:
           -t "$IMAGE:${{ github.sha }}" -t "$IMAGE:latest" container
 
       - name: Smoke test the image
-        run: >
-          docker run --rm --network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges:true
-          --user 12345:12345 "$IMAGE:${{ github.sha }}" sh -c
-          'php -m | grep -q pdo_pgsql && php -r "require \"/app/vendor/autoload.php\";"
-          && test -r /app/composer.json && test ! -w /app/composer.json
-          && . /etc/apache2/envvars && apache2 -t'
+        run: |
+          flags="--network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges:true --user 12345:12345 --tmpfs /run/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345 --tmpfs /run/lock/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345 --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345"
+          docker run --rm $flags "$IMAGE:${{ github.sha }}" sh -c 'php -m | grep -q pdo_pgsql && php -r "require \"/app/vendor/autoload.php\";" && test -r /app/composer.json && test ! -w /app/composer.json && . /etc/apache2/envvars && apache2 -t'
+          docker run -d --name smoke $flags --tmpfs /app/var:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345 -e APP_SECRET="$(openssl rand -hex 16)" "$IMAGE:${{ github.sha }}"
+          code=000
+          for i in $(seq 1 30); do
+            code=$(docker exec smoke php -r '$c = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 3]]); @file_get_contents("http://127.0.0.1:8080/health", false, $c); echo substr($http_response_header[0] ?? "000 000", 9, 3);' || true)
+            [ "$code" = 200 ] && break
+            sleep 1
+          done
+          docker logs smoke
+          docker rm -f smoke
+          test "$code" = 200
 
       - name: Log in to GHCR
+        if: github.ref == 'refs/heads/main'
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
       - name: Push
+        if: github.ref == 'refs/heads/main'
         id: push
         run: |
           docker push --quiet "$IMAGE:${{ github.sha }}"
@@ -125,6 +134,7 @@ jobs:
           echo "digest=$(docker image inspect --format '{{index .RepoDigests 0}}' "$IMAGE:${{ github.sha }}" | cut -d@ -f2)" >> "$GITHUB_OUTPUT"
 
       - name: Attest build provenance
+        if: github.ref == 'refs/heads/main'
         uses: actions/attest-build-provenance@v4
         with:
           subject-name: ${{ env.IMAGE }}
