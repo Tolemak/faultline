@@ -69,7 +69,7 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 
 ## Instancja demo
 
-Ustaw `FAULTLINE_DEMO=1` na osobnej instancji z własną bazą. Wtedy `/login` daje wejście do demo jednym kliknięciem, każdy zapis jest odrzucany, `/api/*` zwraca 404, a `faultline:demo:seed` (uruchamiany co noc) wgrywa trzy syntetyczne projekty z 14 dniami zdarzeń. Na jednym serwerze klon demo dostaje własny `container/.env` z `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` i wolnym `FAULTLINE_PORT`. Nigdy nie podpinaj prawdziwych aplikacji pod instancję demo.
+Ustaw `FAULTLINE_DEMO=1` na osobnej instancji z własną bazą. Wtedy `/login` daje wejście do demo jednym kliknięciem, każdy zapis jest odrzucany, `/api/*` zwraca 404, a `faultline:demo:seed` (uruchamiany co noc) wgrywa trzy syntetyczne projekty z 14 dniami zdarzeń. Na jednym serwerze klon demo dostaje własny `container/.env` z `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` i wolnym `FAULTLINE_PORT`. Małe demo mieści się w `FAULTLINE_WEB_MEM=128m`, `FAULTLINE_PHP_MEMORY=64M`, `FAULTLINE_WORKER_MEM=64m`, `FAULTLINE_WORKER_PHP_MEMORY=48M` i `FAULTLINE_WORKER_MEMORY_LIMIT=32M` (domyślnie: 160m, 96M, 80m, 64M, 48M). Nigdy nie podpinaj prawdziwych aplikacji pod instancję demo.
 
 ## Testy
 

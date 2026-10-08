@@ -60,7 +60,7 @@ Before anything is stored: keys matching `password|passwd|secret|token|api_?key|
 - `faultline:purge`: deletes events past retention and issues left without events. Cron daily.
 - Telegram notifier: new issue and regression, one message per issue per hour at most, token and chat id from env. Disabled when unset.
 - `GET /api/digest` behind a bearer token from env: new issues, regressions and top issues from the last 24h as JSON. The home assistant bot reads it for its morning report.
-- Postgres tuned for a small box (`shared_buffers=32MB`, `max_connections=20`, `work_mem=2MB`). Memory limits: web 160M, worker 96M, db 128M. Worker restarts with `--memory-limit=64M --time-limit=3600`.
+- Postgres tuned for a small box (`shared_buffers=32MB`, `max_connections=20`, `work_mem=2MB`, `maintenance_work_mem=32MB`, `effective_cache_size=256MB`, `autovacuum_max_workers=2`). Apache prefork `MaxRequestWorkers 2`, web `memory_limit=96M`. Memory limits: web 160M, worker 80M, db 128M. Worker runs with PHP `memory_limit=64M` and restarts with `--memory-limit=48M --time-limit=3600`.
 - Bound to `127.0.0.1` on a port from env, Apache on the host proxies to it. Nothing about the server (host, port, paths) goes into the repo.
 
 ## Security checklist
