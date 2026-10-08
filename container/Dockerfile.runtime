@@ -42,3 +42,4 @@ RUN set -eu; \
     ( set +u; . "$conf/envvars"; apache2 -t )
 USER ${APP_UID}:${APP_GID}
 EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD ["php", "-r", "exit(false === @file_get_contents('http://127.0.0.1:8080/health') ? 1 : 0);"]

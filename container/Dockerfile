@@ -2,19 +2,23 @@ FROM php:8.4-apache AS base
 
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
 
-RUN install-php-extensions pdo_pgsql intl zip opcache \
+RUN install-php-extensions pdo_pgsql intl opcache \
     && a2enmod headers expires \
+    && a2dismod -f autoindex negotiation status \
     && rm -rf /var/www/html
 
 COPY container/php/production.ini "$PHP_INI_DIR/conf.d/zz-faultline.ini"
 COPY container/apache/faultline.conf /etc/apache2/sites-available/000-default.conf
 COPY container/apache/limits.conf /etc/apache2/conf-enabled/zz-limits.conf
 
+ENV FAULTLINE_PHP_MEMORY=96M
+
 WORKDIR /app
 
 FROM base AS build
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+RUN install-php-extensions zip
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \

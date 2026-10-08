@@ -69,7 +69,7 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 
 ## Demo instance
 
-Set `FAULTLINE_DEMO=1` on a separate instance with its own database. Then `/login` offers a one-click demo login, every write is refused, `/api/*` returns 404 and `faultline:demo:seed` (run it nightly) loads three synthetic projects with 14 days of events. On one host, give the demo clone its own `container/.env` with `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` and a free `FAULTLINE_PORT`. Never point real apps at a demo instance.
+Set `FAULTLINE_DEMO=1` on a separate instance with its own database. Then `/login` offers a one-click demo login, every write is refused, `/api/*` returns 404 and `faultline:demo:seed` (run it nightly) loads three synthetic projects with 14 days of events. On one host, give the demo clone its own `container/.env` with `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` and a free `FAULTLINE_PORT`. A small demo fits in `FAULTLINE_WEB_MEM=128m`, `FAULTLINE_PHP_MEMORY=64M`, `FAULTLINE_WORKER_MEM=64m`, `FAULTLINE_WORKER_PHP_MEMORY=48M` and `FAULTLINE_WORKER_MEMORY_LIMIT=32M` (defaults: 160m, 96M, 80m, 64M, 48M). Never point real apps at a demo instance.
 
 ## Tests
 
