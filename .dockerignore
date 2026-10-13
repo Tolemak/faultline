@@ -11,3 +11,14 @@ public/bundles
 tests
 var
 vendor
+docs
+README.md
+README.pl.md
+.editorconfig
+.gitattributes
+.gitignore
+.php-cs-fixer.dist.php
+phpstan.dist.neon
+phpunit.dist.xml
+compose.yaml
+bin/check-coverage.php
