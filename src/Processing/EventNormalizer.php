@@ -21,6 +21,7 @@ final class EventNormalizer
      */
     public function normalize(string $eventId, array $payload, \DateTimeImmutable $receivedAt): NormalizedEvent
     {
+        $payload = self::withoutNulBytes($payload);
         [$message, $template] = $this->message($payload);
 
         return new NormalizedEvent(
@@ -251,6 +252,26 @@ final class EventNormalizer
         }
 
         return [] === $parts ? null : $parts;
+    }
+
+    /**
+     * @param array<mixed> $payload
+     *
+     * @return array<mixed>
+     */
+    private static function withoutNulBytes(array $payload): array
+    {
+        $clean = [];
+        foreach ($payload as $key => $value) {
+            $key = \is_string($key) ? str_replace("\0", '', $key) : $key;
+            $clean[$key] = match (true) {
+                \is_string($value) => str_replace("\0", '', $value),
+                \is_array($value) => self::withoutNulBytes($value),
+                default => $value,
+            };
+        }
+
+        return $clean;
     }
 
     /**

@@ -38,7 +38,7 @@ final readonly class TelegramNotifier implements IssueNotifierInterface
         }
 
         try {
-            $this->httpClient->request('POST', \sprintf(self::ENDPOINT, $this->token), [
+            $status = $this->httpClient->request('POST', \sprintf(self::ENDPOINT, $this->token), [
                 'json' => [
                     'chat_id' => $this->chatId,
                     'text' => $this->message($issue, $change),
@@ -47,9 +47,18 @@ final readonly class TelegramNotifier implements IssueNotifierInterface
                 ],
                 'timeout' => 5,
             ])->getStatusCode();
+
+            if (200 !== $status) {
+                $this->logger->warning('Telegram notification failed: {reason}', ['reason' => 'HTTP '.$status]);
+            }
         } catch (ExceptionInterface $e) {
-            $this->logger->warning('Telegram notification failed: {reason}', ['reason' => $e->getMessage()]);
+            $this->logger->warning('Telegram notification failed: {reason}', ['reason' => $this->redact($e->getMessage())]);
         }
+    }
+
+    private function redact(string $text): string
+    {
+        return str_replace($this->token, '[token]', $text);
     }
 
     private function message(Issue $issue, IssueChange $change): string

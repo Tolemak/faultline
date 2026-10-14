@@ -76,6 +76,21 @@ final class ProcessEventHandlerTest extends KernelTestCase
         self::assertSame(IssueChange::New, $this->notifier->calls[0][1]);
     }
 
+    public function testStripsNulBytesThatPostgresCannotStore(): void
+    {
+        $this->process('a0000000000000000000000000000009', [
+            'message' => "Broken\0 input",
+            'tags' => ["k\0ey" => "va\0lue"],
+            'extra' => ["no\0te" => ['nested' => "x\0y"]],
+        ]);
+
+        self::assertSame('Broken input', $this->issues()[0]->getTitle());
+        $event = $this->events()[0];
+        self::assertSame('Broken input', $event->getMessage());
+        self::assertSame(['key' => 'value'], $event->getTags());
+        self::assertSame(['note' => ['nested' => 'xy']], $event->getExtra());
+    }
+
     public function testGroupsSimilarEventsIntoOneIssue(): void
     {
         $this->process('a0000000000000000000000000000001', $this->exceptionPayload(10));

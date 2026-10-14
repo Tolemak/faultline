@@ -56,6 +56,11 @@ final class DemoModeTest extends WebTestCase
 
         $client->request('POST', '/projects', ['name' => 'Spam'], server: ['HTTP_REFERER' => 'https://elsewhere.test/']);
         self::assertResponseRedirects('/', 303);
+
+        foreach (['http://localhost//elsewhere.test/', 'http://localhost/\\elsewhere.test/'] as $referer) {
+            $client->request('POST', '/projects', ['name' => 'Spam'], server: ['HTTP_REFERER' => $referer]);
+            self::assertResponseRedirects('/', 303);
+        }
     }
 
     public function testDemoInstancesRejectIngestAndDigest(): void

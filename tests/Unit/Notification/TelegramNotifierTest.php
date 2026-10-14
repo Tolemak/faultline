@@ -9,8 +9,10 @@ use App\Entity\Project;
 use App\Enum\Level;
 use App\Notification\IssueChange;
 use App\Notification\TelegramNotifier;
+use App\Tests\Support\LoggerSpy;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\AbstractLogger;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\Exception\TransportException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
@@ -71,30 +73,32 @@ final class TelegramNotifierTest extends TestCase
         self::assertSame(0, $client->getRequestsCount());
     }
 
-    public function testLogsTransportFailures(): void
+    public function testLogsTransportFailuresWithoutTheToken(): void
     {
-        $logger = new class extends AbstractLogger {
-            /** @var list<string> */
-            public array $messages = [];
+        $logger = new LoggerSpy();
+        $client = new MockHttpClient(static fn (string $method, string $url): MockResponse => throw new TransportException(\sprintf('Idle timeout reached for "%s".', $url)));
 
-            public function log($level, \Stringable|string $message, array $context = []): void
-            {
-                $this->messages[] = (string) $message;
-            }
-        };
-        $client = new MockHttpClient(static fn (): MockResponse => throw new TransportException('offline'));
+        $this->notifier($client, '123456:SECRET-token', '-1', $logger)->notify($this->issue(), IssueChange::New);
+
+        self::assertSame([['Telegram notification failed: {reason}', ['reason' => 'Idle timeout reached for "https://api.telegram.org/bot[token]/sendMessage".']]], $logger->records);
+    }
+
+    public function testLogsRejectedRequests(): void
+    {
+        $logger = new LoggerSpy();
+        $client = new MockHttpClient(new MockResponse('{"ok":false}', ['http_code' => 400]));
 
         $this->notifier($client, '1:x', '-1', $logger)->notify($this->issue(), IssueChange::New);
 
-        self::assertSame(['Telegram notification failed: {reason}'], $logger->messages);
+        self::assertSame([['Telegram notification failed: {reason}', ['reason' => 'HTTP 400']]], $logger->records);
     }
 
-    private function notifier(MockHttpClient $client, string $token, string $chat, ?AbstractLogger $logger = null): TelegramNotifier
+    private function notifier(MockHttpClient $client, string $token, string $chat, ?LoggerInterface $logger = null): TelegramNotifier
     {
         $urls = $this->createStub(UrlGeneratorInterface::class);
         $urls->method('generate')->willReturn('https://errors.example.com/projects/shop/issues/0');
 
-        return new TelegramNotifier($client, $urls, $logger ?? new \Psr\Log\NullLogger(), $token, $chat);
+        return new TelegramNotifier($client, $urls, $logger ?? new NullLogger(), $token, $chat);
     }
 
     private function issue(): Issue

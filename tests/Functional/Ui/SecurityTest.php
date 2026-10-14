@@ -52,6 +52,8 @@ final class SecurityTest extends WebTestCase
         self::assertStringContainsString("frame-ancestors 'none'", $csp);
         self::assertResponseHeaderSame('X-Content-Type-Options', 'nosniff');
         self::assertResponseHeaderSame('Strict-Transport-Security', 'max-age=31536000');
+        self::assertResponseHeaderSame('Cross-Origin-Opener-Policy', 'same-origin');
+        self::assertResponseHeaderSame('Referrer-Policy', 'same-origin');
 
         $html = (string) $this->client->getResponse()->getContent();
         self::assertDoesNotMatchRegularExpression('/<style\b/i', $html);

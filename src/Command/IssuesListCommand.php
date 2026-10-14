@@ -8,8 +8,10 @@ use App\Entity\Issue;
 use App\Enum\IssueStatus;
 use App\Repository\IssueRepository;
 use App\Repository\ProjectRepository;
+use Psr\Clock\ClockInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Formatter\OutputFormatter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,6 +25,7 @@ final class IssuesListCommand extends Command
     public function __construct(
         private readonly IssueRepository $issues,
         private readonly ProjectRepository $projects,
+        private readonly ClockInterface $clock,
     ) {
         parent::__construct();
     }
@@ -67,7 +70,7 @@ final class IssuesListCommand extends Command
         $sinceOption = $input->getOption('since');
         $since = null;
         if (\is_string($sinceOption) && '' !== $sinceOption) {
-            $since = self::parseSince($sinceOption, new \DateTimeImmutable());
+            $since = self::parseSince($sinceOption, $this->clock->now());
             if (null === $since) {
                 $io->error('Invalid --since, use an ISO 8601 date or an age such as 90m, 24h, 7d.');
 
@@ -102,8 +105,8 @@ final class IssuesListCommand extends Command
             array_map(static fn (array $row): array => [
                 $row['project'],
                 $row['id'],
-                mb_strimwidth($row['title'], 0, self::TITLE_WIDTH, '...'),
-                mb_strimwidth($row['culprit'] ?? '', 0, self::TITLE_WIDTH, '...'),
+                self::cell($row['title']),
+                self::cell($row['culprit'] ?? ''),
                 $row['level'],
                 $row['firstSeen'],
                 $row['lastSeen'],
@@ -128,6 +131,13 @@ final class IssuesListCommand extends Command
         } catch (\Exception) {
             return null;
         }
+    }
+
+    private static function cell(string $text): string
+    {
+        $text = (string) preg_replace('/[\x00-\x1F\x7F\x{80}-\x{9F}]/u', ' ', $text);
+
+        return OutputFormatter::escape(mb_strimwidth($text, 0, self::TITLE_WIDTH, '...'));
     }
 
     /**

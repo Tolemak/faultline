@@ -55,6 +55,23 @@ final class IssuesListCommandTest extends KernelTestCase
         self::assertStringContainsString('unresolved', $tester->getDisplay());
     }
 
+    public function testNeutralisesMarkupAndTerminalEscapesInTitles(): void
+    {
+        $tester = $this->seededTester();
+        $container = self::getContainer();
+        $project = self::createProject($container, 'Hostile');
+        self::seedEvent($container, $project, ['message' => "<href=https://evil.test>Click</> \e]0;pwned\x07\e[2J done"]);
+
+        $tester->execute(['--project' => 'hostile'], ['decorated' => true]);
+
+        $tester->assertCommandIsSuccessful();
+        $display = $tester->getDisplay();
+        self::assertStringContainsString('<href=https://evil.test>Click</>', $display);
+        self::assertStringNotContainsString("\e]", $display);
+        self::assertStringNotContainsString("\e[2J", $display);
+        self::assertStringNotContainsString("\x07", $display);
+    }
+
     public function testRejectsInvalidOptions(): void
     {
         $tester = $this->seededTester();
