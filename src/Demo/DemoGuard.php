@@ -59,6 +59,9 @@ final readonly class DemoGuard
         }
 
         $path = $parts['path'] ?? '/';
+        if (!str_starts_with($path, '/') || str_starts_with($path, '//') || str_contains($path, '\\')) {
+            return $request->getBasePath().'/';
+        }
 
         return isset($parts['query']) ? $path.'?'.$parts['query'] : $path;
     }

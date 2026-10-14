@@ -38,4 +38,5 @@ FROM base AS runtime
 ENV APP_ENV=prod \
     APP_DEBUG=0
 
-COPY --from=build --chown=www-data:www-data /app /app
+COPY --from=build /app /app
+RUN chown -R www-data:www-data /app/var

@@ -6,6 +6,8 @@ namespace App\Tests\Functional\Api;
 
 use App\Entity\Project;
 use App\Message\ProcessEvent;
+use App\Project\ProjectManager;
+use App\Repository\ProjectRepository;
 use App\Tests\Support\ProjectFixtures;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -201,7 +203,7 @@ final class IngestControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(403);
     }
 
-    public function testRateLimitsPerKey(): void
+    public function testRateLimitsPerProject(): void
     {
         $this->client->disableReboot();
         $body = $this->envelope([], [['event', ['message' => 'x']]]);
@@ -217,6 +219,11 @@ final class IngestControllerTest extends WebTestCase
         $retryAfter = (string) $this->client->getResponse()->headers->get('Retry-After');
         self::assertMatchesRegularExpression('/^\d+$/', $retryAfter);
         self::assertResponseHeaderSame('X-Sentry-Rate-Limits', $retryAfter.'::organization');
+
+        $this->project = self::getContainer()->get(ProjectRepository::class)->find(self::projectId($this->project)) ?? throw new \LogicException();
+        self::getContainer()->get(ProjectManager::class)->rotateKey($this->project);
+        $this->post('envelope', $body, ['HTTP_X_SENTRY_AUTH' => $this->auth()]);
+        self::assertResponseStatusCodeSame(429);
     }
 
     /**

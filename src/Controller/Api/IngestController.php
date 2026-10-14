@@ -29,7 +29,7 @@ final readonly class IngestController
     {
         $project = $this->projects->find($projectId);
         if (null === $project) {
-            return new JsonResponse(['detail' => 'Unknown project.'], Response::HTTP_NOT_FOUND);
+            return self::unknownProject();
         }
 
         try {
@@ -54,7 +54,7 @@ final readonly class IngestController
     {
         $project = $this->projects->find($projectId);
         if (null === $project) {
-            return new JsonResponse(['detail' => 'Unknown project.'], Response::HTTP_NOT_FOUND);
+            return self::unknownProject();
         }
 
         try {
@@ -62,6 +62,11 @@ final readonly class IngestController
         } catch (IngestException $e) {
             return $this->error($e);
         }
+    }
+
+    private static function unknownProject(): JsonResponse
+    {
+        return new JsonResponse(['detail' => 'Unknown project.'], Response::HTTP_NOT_FOUND);
     }
 
     private function error(IngestException $e): JsonResponse
