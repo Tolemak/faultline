@@ -13,13 +13,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 final class DigestControllerTest extends WebTestCase
 {
     use EventSeeder;
     use ProjectFixtures;
 
-    private const string TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+    private const string TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
     private KernelBrowser $client;
 
@@ -41,11 +42,28 @@ final class DigestControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(401);
     }
 
-    public function testIsDisabledWithoutAConfiguredToken(): void
+    public function testIsDisabledWithMissingOrShortTokens(): void
     {
-        $controller = new DigestController(self::getContainer()->get(DigestQuery::class), '');
+        $limiter = self::getContainer()->get('limiter.digest');
+        self::assertInstanceOf(RateLimiterFactoryInterface::class, $limiter);
+        foreach (['', str_repeat('a', 16), str_repeat('a', 31)] as $token) {
+            $controller = new DigestController(self::getContainer()->get(DigestQuery::class), $token, $limiter);
+            self::assertSame(404, $controller(new Request())->getStatusCode());
+        }
+    }
 
-        self::assertSame(404, $controller(new Request())->getStatusCode());
+    public function testLimitsRequestsPerIpIncludingInvalidTokens(): void
+    {
+        $this->client->disableReboot();
+        for ($i = 0; $i < 10; ++$i) {
+            $this->client->request('GET', '/api/digest', server: ['REMOTE_ADDR' => '192.0.2.10']);
+            self::assertResponseStatusCodeSame(401);
+        }
+        $this->client->request('GET', '/api/digest', server: ['REMOTE_ADDR' => '192.0.2.10', 'HTTP_AUTHORIZATION' => 'Bearer '.self::TOKEN]);
+        self::assertResponseStatusCodeSame(429);
+        self::assertMatchesRegularExpression('/^[1-9][0-9]*$/', (string) $this->client->getResponse()->headers->get('Retry-After'));
+        $this->client->request('GET', '/api/digest', server: ['REMOTE_ADDR' => '192.0.2.11', 'HTTP_AUTHORIZATION' => 'Bearer '.self::TOKEN]);
+        self::assertResponseIsSuccessful();
     }
 
     public function testSummarisesTheLastDay(): void

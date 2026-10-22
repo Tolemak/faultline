@@ -47,14 +47,14 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 | `faultline:user:create <username>` | Create the admin or reset its password |
 | `faultline:project:create <name> [--origin=…] [--retention=30]` | Create a project and print its DSN |
 | `faultline:project:rotate-key <slug>` | Replace the key and print the new DSN |
-| `faultline:issues:list [--project=<slug>] [--since=24h] [--new] [--status=…] [--limit=50] [--format=table\|json]` | List issues (metadata only, never event payloads) for a review from the shell; `--since` takes an ISO date or an age (`90m`, `24h`, `7d`), `--new` applies it to first seen |
+| `faultline:issues:list [--project=<slug>] [--since=24h] [--new] [--status=…] [--limit=50] [--format=table\|json]` | List issues (metadata only, never event payloads) for a review from the shell; `--since` takes an ISO date or an age (`90m`, `24h`, `7d`, `2w`), `--new` applies it to first seen |
 | `faultline:purge` | Delete events past retention and empty issues |
-| `faultline:demo:seed` | Wipe the database and load synthetic demo data (only with `FAULTLINE_DEMO=1`) |
+| `faultline:demo:seed --force` | Wipe the database and load synthetic demo data (only with `FAULTLINE_DEMO=1` and no users other than `demo`) |
 
 ## Integrations
 
 - Telegram: set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` to get new issues and regressions, at most one message per issue per hour.
-- Digest: set `DIGEST_TOKEN` (16+ characters) and call `GET /api/digest` with `Authorization: Bearer <token>`.
+- Digest: set `DIGEST_TOKEN` (32+ characters) and call `GET /api/digest` with `Authorization: Bearer <token>`. Empty or shorter tokens disable the endpoint (404); requests are limited to 10 per minute per IP (429).
 
 ## Status bar
 
@@ -69,7 +69,7 @@ docker compose -f container/compose.yaml exec -T worker php bin/console faultlin
 
 ## Demo instance
 
-Set `FAULTLINE_DEMO=1` on a separate instance with its own database. Then `/login` offers a one-click demo login, every write is refused, `/api/*` returns 404 and `faultline:demo:seed` (run it nightly) loads three synthetic projects with 14 days of events. On one host, give the demo clone its own `container/.env` with `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` and a free `FAULTLINE_PORT`. A small demo fits in `FAULTLINE_WEB_MEM=128m`, `FAULTLINE_PHP_MEMORY=64M`, `FAULTLINE_WORKER_MEM=64m`, `FAULTLINE_WORKER_PHP_MEMORY=48M` and `FAULTLINE_WORKER_MEMORY_LIMIT=32M` (defaults: 160m, 96M, 80m, 64M, 48M). Never point real apps at a demo instance.
+Set `FAULTLINE_DEMO=1` on a separate instance with its own database. Then `/login` offers a one-click demo login, every write is refused, `/api/*` returns 404 and `faultline:demo:seed --force` (run it nightly) loads three synthetic projects with 14 days of events. On one host, give the demo clone its own `container/.env` with `COMPOSE_PROJECT_NAME=faultline-demo`, `FAULTLINE_IMAGE=faultline-demo` and a free `FAULTLINE_PORT`. A small demo fits in `FAULTLINE_WEB_MEM=128m`, `FAULTLINE_PHP_MEMORY=64M`, `FAULTLINE_WORKER_MEM=64m`, `FAULTLINE_WORKER_PHP_MEMORY=48M` and `FAULTLINE_WORKER_MEMORY_LIMIT=32M` (defaults: 160m, 96M, 80m, 64M, 48M). Never point real apps at a demo instance.
 
 ## Tests
 

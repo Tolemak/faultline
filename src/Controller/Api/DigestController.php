@@ -6,9 +6,11 @@ namespace App\Controller\Api;
 
 use App\Query\DigestQuery;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 final readonly class DigestController
@@ -17,14 +19,21 @@ final readonly class DigestController
         private DigestQuery $digest,
         #[Autowire(env: 'DIGEST_TOKEN')]
         private string $token,
+        #[Target('digest')]
+        private RateLimiterFactoryInterface $digestLimiter,
     ) {
     }
 
     #[Route('/api/digest', name: 'api_digest', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
-        if (\strlen($this->token) < 16) {
+        if (\strlen($this->token) < 32) {
             return new JsonResponse(['detail' => 'Not found.'], Response::HTTP_NOT_FOUND);
+        }
+
+        $limit = $this->digestLimiter->create($request->getClientIp() ?? 'unknown')->consume();
+        if (!$limit->isAccepted()) {
+            return new JsonResponse(['detail' => 'Too many requests.'], Response::HTTP_TOO_MANY_REQUESTS, ['Retry-After' => (string) max(1, $limit->getRetryAfter()->getTimestamp() - time())]);
         }
 
         $header = (string) $request->headers->get('Authorization');

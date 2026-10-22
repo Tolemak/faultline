@@ -45,6 +45,10 @@ final readonly class DemoSeeder
 
     public function seed(): int
     {
+        if (false !== $this->entityManager->getConnection()->fetchOne('SELECT 1 FROM app_user WHERE username <> ? LIMIT 1', [DemoMode::USERNAME])) {
+            throw new \LogicException('Refusing to wipe a database containing users other than demo.');
+        }
+
         $this->wipe();
         $this->createUser();
 
