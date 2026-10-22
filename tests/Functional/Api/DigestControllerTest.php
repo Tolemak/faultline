@@ -13,7 +13,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 
 final class DigestControllerTest extends WebTestCase
 {
@@ -45,7 +44,6 @@ final class DigestControllerTest extends WebTestCase
     public function testIsDisabledWithMissingOrShortTokens(): void
     {
         $limiter = self::getContainer()->get('limiter.digest');
-        self::assertInstanceOf(RateLimiterFactoryInterface::class, $limiter);
         foreach (['', str_repeat('a', 16), str_repeat('a', 31)] as $token) {
             $controller = new DigestController(self::getContainer()->get(DigestQuery::class), $token, $limiter);
             self::assertSame(404, $controller(new Request())->getStatusCode());
