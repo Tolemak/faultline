@@ -9,6 +9,7 @@ use App\Demo\DemoSeeder;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -22,6 +23,11 @@ final class DemoSeedCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption('force', null, InputOption::VALUE_NONE, 'Confirm wiping the demo database');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -32,7 +38,19 @@ final class DemoSeedCommand extends Command
             return Command::FAILURE;
         }
 
-        $events = $this->seeder->seed();
+        if (!$input->getOption('force')) {
+            $io->error('This command wipes the database. Pass --force to confirm.');
+
+            return Command::FAILURE;
+        }
+
+        try {
+            $events = $this->seeder->seed();
+        } catch (\LogicException $exception) {
+            $io->error($exception->getMessage());
+
+            return Command::FAILURE;
+        }
         $io->success(\sprintf('Demo data ready: %d events.', $events));
 
         return Command::SUCCESS;
