@@ -32,7 +32,7 @@ final class DemoSeedCommandTest extends KernelTestCase
         self::createAdmin(self::getContainer());
 
         $tester = $this->tester();
-        $tester->execute([]);
+        $tester->execute(['--force' => true]);
 
         self::assertSame(Command::FAILURE, $tester->getStatusCode());
         self::assertNotNull(self::getContainer()->get(UserRepository::class)->findOneByUsername('admin'));
@@ -41,10 +41,10 @@ final class DemoSeedCommandTest extends KernelTestCase
     public function testReplacesEverythingWithSyntheticData(): void
     {
         $_SERVER['FAULTLINE_DEMO'] = $_ENV['FAULTLINE_DEMO'] = '1';
-        self::createAdmin(self::getContainer());
+        self::createAdmin(self::getContainer(), DemoMode::USERNAME);
 
         $tester = $this->tester();
-        $tester->execute([]);
+        $tester->execute(['--force' => true]);
 
         $tester->assertCommandIsSuccessful();
         $container = self::getContainer();
@@ -59,6 +59,28 @@ final class DemoSeedCommandTest extends KernelTestCase
         self::assertContains(IssueStatus::Ignored, $statuses);
         self::assertNotEmpty(array_filter($issues, static fn (Issue $issue): bool => null !== $issue->getRegressedAt()));
         self::assertMatchesRegularExpression('/Demo data ready: \d+ events\./', $tester->getDisplay());
+    }
+
+    public function testRequiresForce(): void
+    {
+        $_SERVER['FAULTLINE_DEMO'] = $_ENV['FAULTLINE_DEMO'] = '1';
+        self::createAdmin(self::getContainer(), DemoMode::USERNAME);
+        $tester = $this->tester();
+        $tester->execute([]);
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('--force', $tester->getDisplay());
+        self::assertNotNull(self::getContainer()->get(UserRepository::class)->findOneByUsername(DemoMode::USERNAME));
+    }
+
+    public function testProtectsNonDemoUsersEvenWithForce(): void
+    {
+        $_SERVER['FAULTLINE_DEMO'] = $_ENV['FAULTLINE_DEMO'] = '1';
+        self::createAdmin(self::getContainer());
+        $tester = $this->tester();
+        $tester->execute(['--force' => true]);
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('users other than demo', $tester->getDisplay());
+        self::assertNotNull(self::getContainer()->get(UserRepository::class)->findOneByUsername('admin'));
     }
 
     private function tester(): CommandTester

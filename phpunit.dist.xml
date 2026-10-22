@@ -39,7 +39,6 @@
             <directory>src</directory>
         </include>
         <exclude>
-            <file>src/Kernel.php</file>
             <file>src/Runtime/Runtime.php</file>
         </exclude>
 

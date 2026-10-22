@@ -1,5 +1,10 @@
 framework:
     rate_limiter:
+        digest:
+            policy: sliding_window
+            limit: 10
+            interval: '1 minute'
+            cache_pool: cache.digest_limiter
         ingest:
             policy: sliding_window
             limit: '%env(int:INGEST_RATE_LIMIT)%'
@@ -8,5 +13,7 @@ framework:
 
     cache:
         pools:
+            cache.digest_limiter:
+                adapter: cache.app
             cache.ingest_limiter:
                 adapter: cache.app
