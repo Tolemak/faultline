@@ -65,9 +65,14 @@ final readonly class Ingestor
             $this->authorize($project, $key);
         }
 
+        $events = $envelope->eventItems();
+        if (\count($events) > 1) {
+            $this->rateLimiter->consume($project, \count($events) - 1);
+        }
+
         $responseId = EventId::normalize($envelope->header('event_id'));
 
-        foreach ($envelope->eventItems() as $item) {
+        foreach ($events as $item) {
             $event = $this->json->decodeObject($item->payload);
             $eventId = EventId::normalize($event['event_id'] ?? null) ?? $responseId ?? EventId::generate();
             $this->dispatch($project, $eventId, $item->payload);
