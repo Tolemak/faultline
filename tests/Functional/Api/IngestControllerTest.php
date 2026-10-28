@@ -226,6 +226,30 @@ final class IngestControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(429);
     }
 
+    public function testCountsEveryEventOfAnEnvelopeAgainstTheRateLimit(): void
+    {
+        $this->client->disableReboot();
+        $body = $this->envelope([], [['event', ['message' => 'a']], ['event', ['message' => 'b']], ['event', ['message' => 'c']]]);
+
+        $this->post('envelope', $body, ['HTTP_X_SENTRY_AUTH' => $this->auth()]);
+        self::assertResponseIsSuccessful();
+        self::assertCount(3, $this->queued());
+
+        $this->post('envelope', $body, ['HTTP_X_SENTRY_AUTH' => $this->auth()]);
+        self::assertResponseStatusCodeSame(429);
+        self::assertSame([], $this->queued());
+    }
+
+    public function testRejectsEnvelopesWithMoreEventsThanTheRateLimit(): void
+    {
+        $items = array_fill(0, 7, ['event', ['message' => 'x']]);
+
+        $this->post('envelope', $this->envelope([], $items), ['HTTP_X_SENTRY_AUTH' => $this->auth()]);
+
+        self::assertResponseStatusCodeSame(400);
+        self::assertSame([], $this->queued());
+    }
+
     /**
      * @param array<string, string> $server
      */

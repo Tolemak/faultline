@@ -16,10 +16,15 @@ final readonly class IngestRateLimiter
     ) {
     }
 
-    public function consume(Project $project): void
+    public function consume(Project $project, int $tokens = 1): void
     {
         $projectId = $project->getId() ?? throw new \LogicException('Project is not persisted.');
-        $limit = $this->ingestLimiter->create('project-'.$projectId)->consume();
+
+        try {
+            $limit = $this->ingestLimiter->create('project-'.$projectId)->consume($tokens);
+        } catch (\InvalidArgumentException) {
+            throw IngestException::invalidPayload('Too many events in one request.');
+        }
 
         if (!$limit->isAccepted()) {
             $retryAfter = max(1, $limit->getRetryAfter()->getTimestamp() - time());
