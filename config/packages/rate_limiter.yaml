@@ -24,10 +24,3 @@ framework:
                 adapter: cache.app
             cache.anonymous_limiter:
                 adapter: cache.app
-
-when@test:
-    framework:
-        cache:
-            pools:
-                cache.anonymous_limiter:
-                    adapter: cache.adapter.array

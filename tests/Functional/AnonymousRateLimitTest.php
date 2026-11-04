@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer;
 
 final class AnonymousRateLimitTest extends WebTestCase
 {
     public function testLimitsAnonymousWebTrafficPerIp(): void
     {
-        $client = static::createClient();
-        $client->disableReboot();
+        $client = self::freshClient();
 
         for ($i = 0; $i < 120; ++$i) {
             $client->request('GET', '/login', server: ['REMOTE_ADDR' => '192.0.2.70']);
@@ -28,12 +29,23 @@ final class AnonymousRateLimitTest extends WebTestCase
 
     public function testDoesNotLimitHealth(): void
     {
-        $client = static::createClient();
-        $client->disableReboot();
+        $client = self::freshClient();
 
         for ($i = 0; $i < 140; ++$i) {
             $client->request('GET', '/health', server: ['REMOTE_ADDR' => '192.0.2.72']);
             self::assertResponseIsSuccessful();
         }
+    }
+
+    private static function freshClient(): KernelBrowser
+    {
+        $client = static::createClient();
+        $client->disableReboot();
+
+        $clearer = self::getContainer()->get('cache.global_clearer');
+        self::assertInstanceOf(Psr6CacheClearer::class, $clearer);
+        $clearer->clearPool('cache.anonymous_limiter');
+
+        return $client;
     }
 }
