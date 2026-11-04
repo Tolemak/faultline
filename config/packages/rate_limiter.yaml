@@ -10,6 +10,11 @@ framework:
             limit: '%env(int:INGEST_RATE_LIMIT)%'
             interval: '1 minute'
             cache_pool: cache.ingest_limiter
+        anonymous:
+            policy: sliding_window
+            limit: '%env(int:ANONYMOUS_RATE_LIMIT)%'
+            interval: '1 minute'
+            cache_pool: cache.anonymous_limiter
 
     cache:
         pools:
@@ -17,3 +22,12 @@ framework:
                 adapter: cache.app
             cache.ingest_limiter:
                 adapter: cache.app
+            cache.anonymous_limiter:
+                adapter: cache.app
+
+when@test:
+    framework:
+        cache:
+            pools:
+                cache.anonymous_limiter:
+                    adapter: cache.adapter.array
