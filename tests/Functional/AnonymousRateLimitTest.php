@@ -6,7 +6,6 @@ namespace App\Tests\Functional;
 
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\HttpKernel\CacheClearer\Psr6CacheClearer;
 
 final class AnonymousRateLimitTest extends WebTestCase
 {
@@ -42,9 +41,7 @@ final class AnonymousRateLimitTest extends WebTestCase
         $client = static::createClient();
         $client->disableReboot();
 
-        $clearer = self::getContainer()->get('cache.global_clearer');
-        self::assertInstanceOf(Psr6CacheClearer::class, $clearer);
-        $clearer->clearPool('cache.anonymous_limiter');
+        self::getContainer()->get('cache.global_clearer')->clearPool('cache.anonymous_limiter');
 
         return $client;
     }
