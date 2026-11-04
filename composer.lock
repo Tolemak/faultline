@@ -2043,16 +2043,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v8.1.9",
+            "version": "v8.1.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "630e74196a2635ec0f06c12bd3fb47cfedf85157"
+                "reference": "5b6d9b127ec27bc6db59bf65e2e37b6fe5b00083"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/630e74196a2635ec0f06c12bd3fb47cfedf85157",
-                "reference": "630e74196a2635ec0f06c12bd3fb47cfedf85157",
+                "url": "https://api.github.com/repos/symfony/console/zipball/5b6d9b127ec27bc6db59bf65e2e37b6fe5b00083",
+                "reference": "5b6d9b127ec27bc6db59bf65e2e37b6fe5b00083",
                 "shasum": ""
             },
             "require": {
@@ -2119,7 +2119,7 @@
                 "terminal"
             ],
             "support": {
-                "source": "https://github.com/symfony/console/tree/v8.1.9"
+                "source": "https://github.com/symfony/console/tree/v8.1.10"
             },
             "funding": [
                 {
@@ -2139,7 +2139,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-12T19:11:16+00:00"
+            "time": "2026-10-28T11:16:19+00:00"
         },
         {
             "name": "symfony/dependency-injection",
@@ -7383,11 +7383,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.3",
+            "version": "2.3.4",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/4b57dc8ca7456b635d1661845f44bc060b02c6b0",
-                "reference": "4b57dc8ca7456b635d1661845f44bc060b02c6b0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/f20ce6f3c82556cfcfc086b152445a12d1d64fff",
+                "reference": "f20ce6f3c82556cfcfc086b152445a12d1d64fff",
                 "shasum": ""
             },
             "require": {
@@ -7443,7 +7443,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-27T14:06:26+00:00"
+            "time": "2026-10-28T22:38:53+00:00"
         },
         {
             "name": "phpstan/phpstan-doctrine",
