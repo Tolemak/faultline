@@ -20,7 +20,7 @@
         "symfony/console": "8.1.*",
         "symfony/doctrine-messenger": "8.1.*",
         "symfony/dotenv": "8.1.*",
-        "symfony/flex": "^2",
+        "symfony/flex": "^2.12",
         "symfony/framework-bundle": "8.1.*",
         "symfony/http-client": "8.1.*",
         "symfony/messenger": "8.1.*",
@@ -28,11 +28,11 @@
         "symfony/rate-limiter": "8.1.*",
         "symfony/runtime": "8.1.*",
         "symfony/security-bundle": "8.1.*",
-        "symfony/stimulus-bundle": "^3.6",
+        "symfony/stimulus-bundle": "^3.7",
         "symfony/string": "8.1.*",
         "symfony/translation": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
-        "symfony/ux-turbo": "^3.6",
+        "symfony/ux-turbo": "^3.7",
         "symfony/yaml": "8.1.*"
     },
     "config": {
