@@ -2,15 +2,16 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   pull_request:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -91,8 +92,25 @@ jobs:
       - name: Coverage gate
         run: php bin/check-coverage.php var/coverage/clover.xml 80
 
+      - name: Upload coverage
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-php
+          path: var/coverage/clover.xml
+          retention-days: 1
+          if-no-files-found: error
+
+  quality-gate:
+    needs: [checks]
+    if: ${{ !cancelled() }}
+    uses: Tolemak/.github/.github/workflows/quality-gate.yml@78b533105915e536089edb90746b108b6b550464 # v2.0.0
+    with:
+      needs: ${{ toJSON(needs) }}
+      coverage-paths: src/**/*.php
+      semgrep-exclude-rules: missing-user
+
   image:
-    needs: checks
+    needs: [checks, quality-gate]
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
