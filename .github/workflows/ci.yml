@@ -2,15 +2,16 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'LICENSE']
   pull_request:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -91,8 +92,25 @@ jobs:
       - name: Coverage gate
         run: php bin/check-coverage.php var/coverage/clover.xml 80
 
+      - name: Upload coverage
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-php
+          path: var/coverage/clover.xml
+          retention-days: 1
+          if-no-files-found: error
+
+  quality-gate:
+    needs: [checks]
+    if: ${{ !cancelled() }}
+    uses: Tolemak/.github/.github/workflows/quality-gate.yml@78b533105915e536089edb90746b108b6b550464 # v2.0.0
+    with:
+      needs: ${{ toJSON(needs) }}
+      coverage-paths: src/**/*.php
+      semgrep-exclude-rules: missing-user
+
   image:
-    needs: checks
+    needs: [checks, quality-gate]
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -119,11 +137,11 @@ jobs:
 
       - name: Smoke test the image
         run: |
-          flags="--network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges:true --user 12345:12345 --tmpfs /run/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345 --tmpfs /run/lock/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345 --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345"
-          docker run --rm $flags "$IMAGE:${{ github.sha }}" sh -c 'php -m | grep -q pdo_pgsql && php -r "require \"/app/vendor/autoload.php\";" && test -r /app/composer.json && test ! -w /app/composer.json && . /etc/apache2/envvars && apache2 -t'
-          docker run -d --name smoke $flags --tmpfs /app/var:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345 -e APP_SECRET="$(openssl rand -hex 16)" "$IMAGE:${{ github.sha }}"
+          flags=(--network=none --read-only --cap-drop=ALL --security-opt=no-new-privileges:true --user 12345:12345 --tmpfs "/run/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345" --tmpfs "/run/lock/apache2:rw,noexec,nosuid,nodev,size=8m,mode=0700,uid=12345,gid=12345" --tmpfs "/tmp:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345")
+          docker run --rm "${flags[@]}" "$IMAGE:${{ github.sha }}" sh -c 'php -m | grep -q pdo_pgsql && php -r "require \"/app/vendor/autoload.php\";" && test -r /app/composer.json && test ! -w /app/composer.json && . /etc/apache2/envvars && apache2 -t'
+          docker run -d --name smoke "${flags[@]}" --tmpfs "/app/var:rw,noexec,nosuid,nodev,size=64m,mode=0700,uid=12345,gid=12345" -e APP_SECRET="$(openssl rand -hex 16)" "$IMAGE:${{ github.sha }}"
           code=000
-          for i in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             code=$(docker exec smoke php -r '$c = stream_context_create(["http" => ["ignore_errors" => true, "timeout" => 3]]); @file_get_contents("http://127.0.0.1:8080/health", false, $c); echo substr($http_response_header[0] ?? "000 000", 9, 3);' || true)
             [ "$code" = 200 ] && break
             sleep 1
